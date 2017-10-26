@@ -1,0 +1,367 @@
+\documentclass[a4paper]{article}
+% French ......................................................................
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{textcomp}
+
+% paeraetres
+\setlength\parindent{24pt}
+\geometry{hscale=0.77,vscale=0.77,centering}
+\begin{document}
+
+% init Biblio
+\bibliographystyle{unsrt}
+\title{Spark : installation tutorial}
+\author{Antoine Gourru\\
+   Université Lumière Lyon 2,\\
+   Master 2 Data Mining\\ 			  \texttt{antoine.gourru@gmail.fr}
+   \and
+ Erwan Giry-Fouquet\\
+   Université Lumière Lyon 2,\\
+   Master 2 Data Mining\\ 			  \texttt{erwan.giry.fouquet@gmail.com}
+}
+\date{\today}
+\maketitle
+This document is a tutorial to build a cluster with a set of Linux OS
+\\(e.g \url{http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1708.iso} )
+
+\tableofcontents
+
+\newpage
+\section{Before we begin : the Virtual Machine setup}
+If necessary, create a new Virtual Machine with a minimal ram allocated (3072 can be a good start), and a fixed length disk memory around 30G. You can get the CentOs 7 minimal iso at \url{http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1708.iso}, then use it to boot the Virtual Machine (VM). When installing, make sure to :
+\begin{itemize}
+\item activate the network
+\item set a new password for root user
+\end{itemize}
+You will need to authorize ssh connections if you want to access your VM from another machine. For example, you can use :
+\begin{center}
+\begin{tcolorbox}[width=.8\linewidth,colframe=black!5!white]
+systemctl stop firewalld
+\end{tcolorbox}
+\end{center}
+
+
+\section{OS setup}
+
+First, we need the wget tool to download the binaries.  Make sure to update the yum component before that.
+\begin{center}
+\begin{tcolorbox}[width=.8\linewidth,colframe=black!5!white]
+yum update -y
+\\ yum install wget -y
+\end{tcolorbox}
+\end{center}
+
+\noindent The following component is needed to use spark. You can read further information here :
+\\\noindent \url{https://fr.wikipedia.org/wiki/Ntpd}
+\begin{center}
+\begin{tcolorbox}[width=.8\linewidth,colframe=black!5!white]
+ yum install ntp ntpdate ntp-doc -y
+\\service ntpd restart
+\end{tcolorbox}
+\end{center}
+
+\section{Installation of dependencies}
+
+Install a Java jdk version, at least 1.8 (in our example, the openjdk)
+\begin{center}
+\begin{tcolorbox}[width=.8\linewidth,colframe=black!5!white]
+yum install java-1.8.0-openjdk* -y
+\\sudo ln -s /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.144-0.b01.el7\_4.x86\_64 /usr/lib/jvm/default-java
+\end{tcolorbox}
+\end{center}
+
+We also need Scala :
+\begin{center}
+\begin{tcolorbox}[width=.8\linewidth,colframe=black!5!white]
+wget http://www.scala-lang.org/files/archive/scala-2.11.1.tgz
+\\ tar xvf scala-2.11.1.tgz
+\\ sudo mv scala-2.11.1 /usr/lib
+\\ sudo ln -s /usr/lib/scala-2.11.1 /usr/lib/scala
+\end{tcolorbox}
+\end{center}
+
+\section{Get Spark ! }
+
+We first download a Spark binary file, then unzip it before moving its content to the definitive repository (/usr/local/spark)
+\begin{center}
+\begin{tcolorbox}[width=.8\linewidth,colframe=black!5!white]
+wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.0-bin-hadoop2.7.tgz
+\\tar xf spark-2.0.0-bin-hadoop2.7.tgz
+\\mkdir /usr/local/spark
+\\cp -r spark-2.0.0-bin-hadoop2.7/* /usr/local/spark
+\end{tcolorbox}
+\end{center}
+\newpage
+\section{Set the environment variables }
+We need to change the environment variable to use the primitive Spark, Java and Scala scripts outside their repository scope.
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+echo \textquotesingle export PATH=\$PATH:/usr/lib/scala/bin\textquotesingle \textgreater \textgreater .bash\_profile
+\\echo \textquotesingle export PATH=\$PATH:/usr/lib/jvm/default-java/bin\textquotesingle \textgreater \textgreater .bash\_profile
+\\echo \textquotesingle export PATH=\$PATH:/usr/local/spark/bin \textquotesingle \textgreater \textgreater .bash\_profile
+\\echo \textquotesingle export SPARK\_HOME=/usr/local/spark\textquotesingle \textgreater \textgreater .bash\_profile
+\\source \texttildelow/.bash\_profile
+\end{tcolorbox}
+\end{center}
+
+
+\noindent You can now use the \colorbox[gray]{0.90}{spark-shell} command to launch spark (try \colorbox[gray]{0.90}{run-example SparkPi 10})!
+\\Congratulation, you are the proud owner of a Wunderbar Spark-ready machine  !
+
+\section{Network configuration}
+
+\subsection{Change each VM hostname}
+Give your machine an hostname, in the following examples, we will use ``slave1.atscluster''
+\\Set the name on the VM.
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+hostname slave1.atscluster
+\\echo slave1.atscluster > /etc/hostname
+\\HOSTNAME=slave1.atscluster
+%\\export \$HOSTNAME
+\end{tcolorbox}
+\end{center}
+
+\subsection{Password-less ssh connexion}
+The master will need to access each slave with a password-less ssh, meaning an ssh connection without using a password :
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+ssh-keygen -t rsa
+\end{tcolorbox}
+\end{center}
+Use default options, leave the pass-phrase empty. Then, simply send the public key to the machines you want to connect to in ssh.
+\begin{center}
+\begin{tcolorbox}[width=0.9\linewidth,colframe=black!5!white]
+cat \texttildelow/.ssh/id\_rsa.pub | ssh root@slave1.atscluster \textquotesingle cat \textgreater \textgreater \texttildelow/.ssh/authorized\_keys\textquotesingle
+\end{tcolorbox}
+\end{center}
+
+\subsection{modify host file}
+Different strategies are possible, the idea is that for every machine, the hostfile contains the hostname and the IP address of every machine in the cluster.
+The hosts file is in /etc/hosts.
+\\ For example, you could configure the file in a single machine (the master) and send it via ssh to all the machine with the command
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+scp -r -p /etc/hosts root@slavei.atscluster:/etc/hosts
+\end{tcolorbox}
+\end{center}
+
+\section{Building the cluster}
+
+First, we add each slave to the spark conf file of the master
+\begin{center}
+\begin{tcolorbox}[width=0.9\linewidth,colframe=black!5!white]
+echo -e "slave1.atscluster\textbackslash nslavei\textbackslash n ETC(ITERATE OVER SLAVE HOST NAME)" \textgreater\ \$SPARK\_HOME/conf/slaves
+\end{tcolorbox}
+\end{center}
+
+\noindent Copy the spark-env.sh template to a new spark-env file. Then add the machine host name to the SPARK\_MASTER\_HOST and SPARK\_LOCAL\_IP variables. You need to replicate this action on  each machine of the cluster.
+\begin{center}
+\begin{tcolorbox}[width=\linewidth,colframe=black!5!white]
+cp \$SPARK\_HOME/conf/spark-env.sh.template \$SPARK\_HOME/conf/spark-env.sh
+\\echo \textquotesingle SPARK\_MASTER\_HOST=slave1.atscluster\textquotesingle \textgreater\textgreater \$SPARK\_HOME/conf/spark-env.sh
+\\echo \textquotesingle SPARK\_LOCAL\_IP=slave1.atscluster\textquotesingle \textgreater\textgreater \$SPARK\_HOME/conf/spark-env.sh
+\end{tcolorbox}
+\end{center}
+
+\noindent Now we can start the cluster from the master for testing using :
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+\$SPARK\_HOME/sbin/start-all.sh
+\end{tcolorbox}
+\end{center}
+
+\section{Using HDFS}
+
+We want to use Spark with the HDFS solution of Hadoop \footnote{\url{http://hadoop.apache.org/}}.
+
+\subsection{Add the Hadoop user}The framework require a dedicated User on the machine. We therefore create the user ``hadoop'' using:
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+useradd hadoop
+passwd hadoop
+\end{tcolorbox}
+\end{center}
+
+\noindent Then we download the software and install it
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+wget http://apache.crihan.fr/dist/hadoop/common/hadoop-2.7.4/hadoop-2.7.4.tar.gz
+\\tar xfz hadoop-2.7.4.tar.gz
+\\mkdir /opt/hadoop
+\\mv hadoop-2.7.4/* /opt/hadoop
+\\chown -R hadoop:hadoop /opt/hadoop/
+\end{tcolorbox}
+\end{center}
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+su - hadoop
+\\ssh-keygen -t rsa
+\\cat ~/.ssh/id\_rsa.pub >> ~/.ssh/authorized\_keys
+\\chmod 0600 ~/.ssh/authorized\_keys
+\end{tcolorbox}
+\end{center}
+
+Hadoop needs environment variables, which we parametrize like so :
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+echo '
+\\export JAVA\_HOME=/usr/lib/jvm/default-java
+\\export CLASSPATH=.:\$JAVA\_HOME/jre/lib:\$JAVA\_HOME/lib:\$JAVA\_HOME/lib/tools.jar
+\\export HADOOP\_HOME=/opt/hadoop
+\\export HADOOP\_INSTALL=\$HADOOP\_HOME
+\\export HADOOP\_MAPRED\_HOME=\$HADOOP\_HOME
+\\export HADOOP\_COMMON\_HOME=\$HADOOP\_HOME
+\\export HADOOP\_HDFS\_HOME=\$HADOOP\_HOME
+\\export YARN\_HOME=\$HADOOP\_HOME
+\\export HADOOP\_COMMON\_LIB\_NATIVE\_DIR=\$HADOOP\_HOME/lib/native
+\\export PATH=\$PATH:\$HADOOP\_HOME/sbin:\$HADOOP\_HOME/bin
+\\' \textgreater \textgreater .bash\_profile
+\\source .bash\_profile
+\\cd \$HADOOP\_HOME/etc/hadoop/
+\end{tcolorbox}
+\end{center}
+%
+%
+%
+%
+\subsection{Create/modify configuration files}
+First, we will create the missing files :
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+mkdir /opt/hadoop/hadoopdata
+\\mkdir /opt/hadoop/hadoopdata/namenode
+\\mkdir /opt/hadoop/hadoopdata/datanode
+\\cp mapred-site.xml.template mapred-site.xml
+\end{tcolorbox}
+\end{center}
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+s='JAVA\_HOME=\${JAVA\_HOME}'
+\\r='export JAVA\_HOME=/usr/lib/jvm/default-java'
+\\sed -i "/\$s/c \$r" \$HADOOP\_HOME/etc/hadoop/hadoop-env.sh
+\end{tcolorbox}
+\end{center}
+
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+vi mapred-site.xml
+\\\#\#\#\#\# in <configuration>
+\\ <property>
+\\ <name>mapreduce.framework.name</name>
+\\ <value>yarn</value>
+\\ </property>
+\\\#\#\#\#
+\end{tcolorbox}
+\end{center}
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+vi yarn-site.xml
+\\\#\#\#\#
+\\<property>
+\\<name>yarn.nodemanager.aux-services</name>
+\\<value>mapreduce\_shuffle</value>
+\\</property>
+\\\#\#\#\#
+\end{tcolorbox}
+\end{center}
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+vi core-site.xml
+\\\#\#\#\#
+\\<!-- Put site-specific property overrides in this file. -->
+\\ <property>
+\\  <name>fs.default.name</name>
+\\  <value>hdfs://master.atscluster:9000</value>
+\\ </property>
+\\  <property>
+\\  <name>fs.defaultFS</name>
+\\  <value>hdfs://master.atscluster:8020/</value>
+\\ </property>
+\\\#\#\#\#
+\end{tcolorbox}
+\end{center}
+
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+vi hdfs-site.xml
+\\\#\#\#\#
+\\    <!-- Put site-specific property overrides in this file. -->
+\\ <property>
+\\  <name>dfs.replication</name>
+\\  <value>1</value>
+\\ </property>
+\\
+\\<property>
+\\  <name>dfs.name.dir</name>
+\\  <value>file:///opt/hadoop/hadoopdata/namenode</value>
+\\ </property>
+\\
+\\ <property>
+\\  <name>dfs.data.dir</name>
+\\  <value>file:///opt/hadoop/hadoopdata/datanode</value>
+\\ </property>
+\\
+\\ <property>
+\\  <name>fs.defaultFS</name>
+\\  <value>hdfs://master.atscluster:8020</value>
+\\ </property>
+\\\#\#\#\#
+\end{tcolorbox}
+\end{center}
+
+To finish :
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+hdfs namenode -format
+\end{tcolorbox}
+\end{center}
+%
+%
+%
+%
+%
+%
+\section{Appendix 1 : copy/paste-able code for the basic setup}
+\begin{center}
+\begin{tcolorbox}[width=0.8\linewidth,colframe=black!5!white]
+systemctl stop firewalld
+\\yum update -y
+\\ yum install wget -y
+\\yum install ntp ntpdate ntp-doc -y
+\\service ntpd restart
+\\yum install java-1.8.0-openjdk* -y
+\\sudo ln -s /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.144-0.b01.el7\_4.x86\_64 /usr/lib/jvm/default-java
+\\wget http://www.scala-lang.org/files/archive/scala-2.11.1.tgz
+\\ tar xvf scala-2.11.1.tgz
+\\ sudo mv scala-2.11.1 /usr/lib
+\\ sudo ln -s /usr/lib/scala-2.11.1 /usr/lib/scala
+\\wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.0-bin-hadoop2.7.tgz
+\\tar xf spark-2.0.0-bin-hadoop2.7.tgz
+\\mkdir /usr/local/spark
+\\cp -r spark-2.0.0-bin-hadoop2.7/* /usr/local/spark
+\\echo \textquotesingle export PATH=\$PATH:/usr/lib/scala/bin\textquotesingle >> .bash\_profile
+\\echo \textquotesingle export PATH=\$PATH:/usr/lib/jvm/default-java/bin\textquotesingle >> .bash\_profile
+\\echo \textquotesingle export PATH=\$PATH:/usr/local/spark/bin \textquotesingle >> .bash\_profile
+\\echo \textquotesingle export SPARK\_HOME=/usr/local/spark\textquotesingle >> .bash\_profile
+\\source \texttildelow/.bash\_profile
+\end{tcolorbox}
+\end{center}
+\end{document}
