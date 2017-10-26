@@ -1,13 +1,13 @@
 # Wikipedia Mining
 [Readme in english](./README.md)
 
+## Présentation
+
 L'objectif de ce projet est d'analyser un dump de donnée Wikipedia, en langue française, suivant deux approches : 
 * text-mining : construction d'un espace vectoriel (mot,vecteur), word embedding
 * graph-mining : exploitation des lien entre les pages
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Installation
 
 ### Prérequis
 
@@ -21,7 +21,7 @@ mvn --version
 java -version
 ```
 
-### Installation
+### Assemblage
 
 Assemblez le projet Maven :
 
@@ -52,7 +52,7 @@ Pour exécuter le projet sur le cluster, il faut déployer le JAR sur un cluster
 un spark-submit.
 **A documenter**
 
-## Authors
+## Auteurs
 Equipe [ArcToScience](arctoscience.com), M2 DM Université Lyon 2  :
 
 * **Antoine Gourru** - [GitHub](https://github.com/AntoineArctos) - [Site web](antoinegourru.com)
@@ -62,9 +62,3 @@ Equipe [ArcToScience](arctoscience.com), M2 DM Université Lyon 2  :
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
