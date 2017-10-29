@@ -90,7 +90,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>run.Word2VecHP</mainClass>
+                            <mainClass>run.local.Word2VecLocalExample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
