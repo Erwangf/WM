@@ -34,7 +34,7 @@ mvn clean install
 ## Auteurs
 Equipe [ArcToScience](arctoscience.com), M2 DM Université Lyon 2  :
 
-* **Antoine Gourru** - [GitHub](https://github.com/AntoineArctos) - [Site web](antoinegourru.com)
+* **Antoine Gourru** - [GitHub](https://github.com/AntoineGourru) - [Site web](antoinegourru.com)
 * **Erwan Giry-Fouquet**  -  [GitHub](https://github.com/Erwangf) - [Site web](erwangf.com)
 
 
