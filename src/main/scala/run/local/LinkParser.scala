@@ -15,13 +15,15 @@ object LinkParser {
 
 					//			We use here an extract of the wikipedia dump
 					var fileXMLPath = Word2VecLocalExample.getClass.getClassLoader.getResource("xml.txt").getPath
+
+					//					We load the file and create an Array of all "page" markup 
 					val xml = ( XML.loadFile(fileXMLPath) \\ "page")
 
 					//	  We set a regex for parsing all [[]] sub strings
 					val keyValPattern: Regex = "\\[\\[(.+?)\\]\\]".r
 
 					xml.foreach{ n => 
-					//					  ns is 0 if it is a page (i.e not a disucssion, forum etc..)
+					//ns is 0 if it is a page (i.e not a disucssion, forum etc..)
 					val ns  = (n \ "ns").text
 					if(ns == "0"){
 						val title  = (n \ "title").text
@@ -32,14 +34,10 @@ object LinkParser {
 										var link = patternMatch.group(1)
 												if (!link.contains(":")) {
 													var out = link
-															if (link.contains("#")) {
-																out = out.split("#")(0)
-															}
-													if (out.contains("|")) {
-														out = out.split("\\|")(0)
-													}
-													bedges.write(s"$title; $out")
-													bedges.newLine()
+															out = out.split("#")(0)
+															out = out.split("\\|")(0)
+															bedges.write(s"$title; $out")
+															bedges.newLine()
 												}
 									}
 								}
