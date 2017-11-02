@@ -90,22 +90,20 @@ object LinkParser {
 
   def main(args: Array[String]): Unit = {
 
-
-    var vertices: Array[String] = Array()
-    var edges: Array[(String, String)] = Array()
-
-
     //	We use here an extract of the wikipedia dump
     var fileXMLPath = Word2VecLocalExample.getClass.getClassLoader.getResource("xml.txt").getPath
 
+    // We create the LinkParser
     val linkParser = new LinkParser()
 
+    // Load our XML file
     linkParser.loadXMLFile(fileXMLPath)
 
+    // print some informations about the edges and vertices
     println(s"loaded ${linkParser.getEdges.length} edges")
     println(s"loaded ${linkParser.getVertices.length} vertices")
 
-    //  FileWriter buffer opening
+    // then save our data to disk
     val verticesPath = Word2VecLocalExample.getClass.getClassLoader.getResource("vertices.txt").getPath
     val edgesPath = Word2VecLocalExample.getClass.getClassLoader.getResource("edges.txt").getPath
 
