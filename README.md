@@ -34,7 +34,7 @@ mvn clean install
 ## Authors
 [ArcToScience](arctoscience.com) Team, M2 Data Mining, University Lyon 2, France  :
 
-* **Antoine Gourru** - [GitHub](https://github.com/AntoineArctos) - [Web site](antoinegourru.com)
+* **Antoine Gourru** - [GitHub](https://github.com/AntoineGourru) - [Web site](antoinegourru.com)
 * **Erwan Giry-Fouquet**  -  [GitHub](https://github.com/Erwangf) - [Web site](erwangf.com)
 
 
