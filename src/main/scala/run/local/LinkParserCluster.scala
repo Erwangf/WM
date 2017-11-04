@@ -20,10 +20,10 @@ object LinkParserCluster {
       for (patternMatch <- keyValPattern.findAllMatchIn(e)) {
         val link = patternMatch.group(1)
         if (!link.contains(":")) {
-          var out = link
-          out = out.split("#")(0)
-          out = out.split("\\|")(0)
-          out_final = out_final :+ (title, out)
+          // Sometimes, link.split("#")(0).split("\\|") is empty causing an ArrayIndexOutOfBoundsException
+          if(link.split("#").length!=0 && link.split("#")(0).split("\\|").length!=0){
+            out_final = out_final :+ (title, link.split("#")(0).split("\\|")(0))
+          }
         }
       }
     }
@@ -66,12 +66,14 @@ object LinkParserCluster {
 
     df = df.withColumn("edges", udfParser(df.col("title"), df.col("text")))
 
+    println("Loaded "+df.count()+" pages !")
+
     // Now we will extract all the edges
-    // first collect, then convert Array[WrappedArray[Row]] to Array[WrappedArray[(String,String)]]
+    // first we take 1000 edges, then convert Array[WrappedArray[Row]] to Array[WrappedArray[(String,String)]]
     // That's because when importing a Tuple (String,String), Spark convert it to a struct, which is basically a Row.
     // So we got Rows (our edges) containings Rows (origin,destination)... :p
     df.select("edges")
-      .collect()
+      .take(1000)
       .map(_.get(0)
         .asInstanceOf[mutable.WrappedArray[Row]]
         .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))
