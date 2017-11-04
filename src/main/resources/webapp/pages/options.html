@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Load data</title>
+    <title>Options</title>
     <link rel="stylesheet" href="../css/bootstrap-grid.min.css">
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -24,10 +24,10 @@
                 <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a href="load.html" class="nav-link active">Load</a>
+                <a href="load.html" class="nav-link">Load</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="options.html">Options</a>
+                <a class="nav-link active" href="options.html">Options</a>
             </li>
 
         </ul>
@@ -37,10 +37,30 @@
 <div class="container">
 
     <div class="welcome">
-        <h1>Load data</h1>
+        <h1>Options</h1>
+    </div>
+    <div>
+        <h2 class="text-center">Spark Options</h2>
+
+        <form class="row">
+            <div class="form-group col-sm-6">
+                <label for="sparkMasterInput">Spark Master address</label>
+                <input class="form-control" id="sparkMasterInput" placeholder="spark://master:7077">
+            </div>
+            <div class="form-group col-sm-6">
+                <label for="sparkMasterInput">Spark App name (optional)</label>
+                <input class="form-control" id="sparkAppNameInput" placeholder="Wikipedia Mining">
+            </div>
+            <div class="form-group col-sm-12">
+                <label for="addSparkConfigInput">Additional Spark Configuration</label>
+                <textarea class="form-control" id="addSparkConfigInput" rows="6"></textarea>
+            </div>
+        </form>
+
     </div>
 
 </div>
+
 
 <script src="../js/jquery-3.2.1.min.js"></script>
 <script src="../js/tether.min.js"></script>
