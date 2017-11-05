@@ -1,34 +1,12 @@
 package run.local
 
+import run.shared.linkParser
 import org.apache.spark.sql.{Row, SparkSession}
-
 import scala.collection.mutable
 import scala.util.matching.Regex
-
 object LinkParserCluster {
-  /**
-    * take a title and a row string to create an Array of vertices
-    *
-    * @param title the page title (meaning the starting edge)
-    * @param bob   the raw text to parse in order to extract references to other pages
-    * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
-    */
-  def parse(title: String, bob: String): Array[(String, String)] = {
-    val keyValPattern: Regex = "\\[\\[(.+?)\\]\\]".r
-    var out_final: Array[(String, String)] = Array()
-    for (e <- bob.split('\n')) {
-      for (patternMatch <- keyValPattern.findAllMatchIn(e)) {
-        val link = patternMatch.group(1)
-        if (!link.contains(":")) {
-          // Sometimes, link.split("#")(0).split("\\|") is empty causing an ArrayIndexOutOfBoundsException
-          if(link.split("#").length!=0 && link.split("#")(0).split("\\|").length!=0){
-            out_final = out_final :+ (title, link.split("#")(0).split("\\|")(0))
-          }
-        }
-      }
-    }
-    out_final
-  }
+
+ 
 
   def main(args: Array[String]): Unit = {
 
@@ -57,7 +35,7 @@ object LinkParserCluster {
 
     // we need to import spark.sql.functions._ in order to use the udf function
     import org.apache.spark.sql.functions._
-    val parser = (s1: String, s2: String) => parse(s1, s2)
+    val parser = (s1: String, s2: String) => LinkParser.externalParser(s1, s2)
 
     // udf transform a function to an user-defined function, usable on columns
     val udfParser = udf(parser)

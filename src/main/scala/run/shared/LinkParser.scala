@@ -1,8 +1,9 @@
-package run.local
+package run.shared
 
 import scala.util.matching.Regex
 import scala.xml.XML
 import java.io._
+import run.local.Word2VecLocalExample
 
 
 class LinkParser {
@@ -14,7 +15,7 @@ class LinkParser {
     * Load an XML File, parse wikipedia, and extract 2 arrays, vertices and edges
     * @param xmlPath The file to parse
     */
-  def loadXMLFile(xmlPath: String): Unit = {
+  def simpleXMLParser(xmlPath: String): Unit = {
 
     //	We load the file and create an Array of all "page" markup
     val xml = XML.loadFile(xmlPath) \\ "page"
@@ -44,7 +45,6 @@ class LinkParser {
     }
 
   }
-
   /**
     * @return an Array of (origin,destination) tuples
     */
@@ -81,38 +81,27 @@ class LinkParser {
     bedges.close()
     bvert.close()
   }
-
-}
-
-
-object LinkParser {
-
-
-  def main(args: Array[String]): Unit = {
-
-    //	We use here an extract of the wikipedia dump
-    var fileXMLPath = Word2VecLocalExample.getClass.getClassLoader.getResource("xml.txt").getPath
-
-    // We create the LinkParser
-    val linkParser = new LinkParser()
-
-    // Load our XML file
-    linkParser.loadXMLFile(fileXMLPath)
-
-    // print some informations about the edges and vertices
-    println(s"loaded ${linkParser.getEdges.length} edges")
-    println(s"loaded ${linkParser.getVertices.length} vertices")
-
-    // then save our data to disk
-    val verticesPath = Word2VecLocalExample.getClass.getClassLoader.getResource("vertices.txt").getPath
-    val edgesPath = Word2VecLocalExample.getClass.getClassLoader.getResource("edges.txt").getPath
-
-    linkParser.printVerticesAndEdges(verticesPath, edgesPath)
-
-    println("Edges and vertices saved to edges.txt and vertices.txt")
-
-
+    /**THis is a public function to be used, no object creation needed
+    * take a title and a row string to create an Array of vertices
+    *
+    * @param title the page title (meaning the starting edge)
+    * @param bob   the raw text to parse in order to extract references to other pages
+    * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
+    */
+ def externalParser(title: String, bob: String): Array[(String, String)] = {
+    val keyValPattern: Regex = "\\[\\[(.+?)\\]\\]".r
+    var out_final: Array[(String, String)] = Array()
+    for (e <- bob.split('\n')) {
+      for (patternMatch <- keyValPattern.findAllMatchIn(e)) {
+        val link = patternMatch.group(1)
+        if (!link.contains(":")) {
+          // Sometimes, link.split("#")(0).split("\\|") is empty causing an ArrayIndexOutOfBoundsException
+          if(link.split("#").length!=0 && link.split("#")(0).split("\\|").length!=0){
+            out_final = out_final :+ (title, link.split("#")(0).split("\\|")(0))
+          }
+        }
+      }
+    }
+    out_final
   }
-
-
 }
