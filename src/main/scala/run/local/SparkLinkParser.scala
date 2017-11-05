@@ -4,7 +4,7 @@ import run.shared.LinkParser
 import org.apache.spark.sql.{Row, SparkSession}
 import scala.collection.mutable
 import scala.util.matching.Regex
-object LinkParserCluster {
+object SparkLinkParser {
 
   def main(args: Array[String]): Unit = {
 
