@@ -1,12 +1,10 @@
 package run.local
 
-import run.shared.linkParser
+import run.shared.LinkParser
 import org.apache.spark.sql.{Row, SparkSession}
 import scala.collection.mutable
 import scala.util.matching.Regex
 object LinkParserCluster {
-
- 
 
   def main(args: Array[String]): Unit = {
 
