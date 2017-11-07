@@ -6,7 +6,7 @@ object TextCleaner {
     * Clean a wikipedia page from Markdown.
     * <b> Do not use on multiple pages, or fraction of one page ! </b>
     * @param text the text of one wikipedia page
-    * @return
+    * @return the input text, cleaned from markdown
     */
   def cleanPage(text: String): String = {
     var output = text
