@@ -1,23 +1,39 @@
 package webapp;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
+import app.MiningApp;
 import org.apache.spark.sql.SparkSession;
-import scala.Tuple2;
+import spark.ResponseTransformer;
+import com.google.gson.Gson;
 
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.staticFileLocation;
+import static spark.Spark.*;
 
 public class Server {
     public static void main(String[] args) {
         port(8080);
         staticFileLocation("webapp");
 
-//        Tuple2<Dataset<Row>, SparkSession> t = TestSparkActive.getDFandSS();
-//        Dataset<Row> ds = t._1;
-//        SparkSession ss = t._2;
-//
-//        get("/count",(req,res)-> ds.count());
+
+        // Spark Config
+        String filePath = Server.class.getClassLoader().getResource("xml.txt").getPath();
+        String masterInfo = "local[*]";
+        SparkSession ss = SparkSession.builder().appName("LinkParser").master(masterInfo).getOrCreate();
+
+        MiningApp.init(ss);
+        MiningApp.importDump(filePath);
+
+
+        // Json transformer
+        ResponseTransformer jsonTransformer = new ResponseTransformer() {
+            private Gson gson = new Gson();
+            @Override
+            public String render(Object model) throws Exception {
+                return gson.toJson(model);
+            }
+        };
+
+
+        get("/count",(req,res)-> MiningApp.pageCount());
+        get("/find/:title",(req,res)-> MiningApp.getPage(req.params("title")),jsonTransformer);
+
     }
 }
