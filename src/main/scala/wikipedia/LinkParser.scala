@@ -1,11 +1,9 @@
-package run.shared
+package wikipedia
 
 import scala.util.matching.Regex
-import scala.xml.XML
-import java.io._
 
 object LinkParser {
-  /** THis is a public function to be used, no object creation needed
+  /** This is a public function to be used, no object creation needed
     * take a title and a row string to create an Array of vertices
     *
     * @param title the page title (meaning the starting edge)

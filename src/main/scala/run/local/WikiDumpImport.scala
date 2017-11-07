@@ -1,7 +1,8 @@
 package run.local
 
-import run.shared.LinkParser
 import org.apache.spark.sql.{Row, SparkSession}
+import wikipedia.LinkParser
+
 import scala.collection.mutable
 import scala.util.matching.Regex
 
@@ -42,7 +43,7 @@ object WikiDumpImport {
 					// Then we apply our spark-friendly parser function on our rows :
 
 					df = df.withColumn("edges", udfParser(df.col("title"), df.col("text")))
-					//TODO : mettre au format GraphX friendly 
+					//TODO : mettre au format GraphX friendly
 					//TODO : ecrire sur le disk
 
 					////					 Now we will extract all the edges
