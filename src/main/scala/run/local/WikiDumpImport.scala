@@ -2,7 +2,7 @@ package run.local
 
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import wikipedia.LinkParser
+import wikipedia.GraphOperator
 import org.apache.spark.{HashPartitioner, SparkContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.graphx._
@@ -37,7 +37,7 @@ object WikiDumpImport {
     // We will work with DataFrames, not RDDs. DataFrames support SQL, so we will apply an user-defined function
     // (UDF) on one specific column, then create a new column ( .withColumn  )
 
-    val parser = (s1: String, s2: String) => LinkParser.externalParser(s1, s2)
+    val parser = (s1: String, s2: String) => GraphOperator.LinkParser(s1, s2)
 
     // udf transform a function to an user-defined function, usable on columns
     val udfParser = udf(parser)
@@ -48,11 +48,11 @@ object WikiDumpImport {
 
     //					Graph construction -> com to come
     import ss.implicits._
-    var a = df.select("edges")
+    var a = ss.sparkContext.parallelize(df.select("edges")
       .take(10).flatMap(_.get(0)
       .asInstanceOf[mutable.WrappedArray[Row]]
-      .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String])))
-    var graph = unweightedStringEdgeListViaJoin(ss.sparkContext.parallelize(a))
+      .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))))
+    var graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
     graph.vertices.foreach(println)
     //TODO : ecrire sur le disk
 
@@ -82,40 +82,5 @@ object WikiDumpImport {
     df
   }
 
-  /**
-    * @author eric-kimbrel
-    *         https://gist.github.com/eric-kimbrel/01ab2f97c4438ba7bd9a
-    *         Converts an RDD[(String,String)] into Graph[String,Long], all edge weights are set to 1L
-    *         Performs joins to associate edges with Long Id's.  May be slow but will support large data sets
-    * @param data simple edge list
-    * @return Graph[String,Long] with all edge weights 1L
-    */
-  def unweightedStringEdgeListViaJoin(data: RDD[(String, String)]): Graph[String, Long] = {
-
-    data.cache()
-
-    val _flat = data
-      .flatMap({ case (src, dst) => Seq((src, 0), (dst, 0)) })
-      .reduceByKey(_ + _)
-      .map({ case (name, count) => name })
-      .cache()
-    _flat.count()
-    // IMPORTANT:  you must materialize the rdd prior to using zipWithUniqueId or zipWithIndex
-    //  if you do not do this step duplicate ids can be generated.
-    val flat = _flat
-      .zipWithUniqueId()
-      .cache()
-
-    val srcEncoded = data.join(flat).map({ case (srcStr, (dstStr, srcLong)) => (dstStr, srcLong) })
-    val edges = srcEncoded.join(flat).map({ case (dstStr, (srcLong, dstLong)) => Edge(srcLong, dstLong, 1L) }).cache()
-    val vertices = flat.map({ case (name, id) => (id, name) }).cache()
-
-    println("edges: " + edges.count())
-    println("vertices: " + vertices.count())
-    data.unpersist()
-    flat.unpersist()
-    _flat.unpersist()
-
-    Graph(vertices, edges).partitionBy(PartitionStrategy.EdgePartition2D)
-  }
+ 
 }
