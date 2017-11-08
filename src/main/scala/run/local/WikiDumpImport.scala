@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.util.matching.Regex
 
 object WikiDumpImport {
-
+  
   def main(args: Array[String]): Unit = {
     var filePath = this.getClass.getClassLoader.getResource("xml.txt").getPath
     var masterInfo = "local[*]"
@@ -39,8 +39,6 @@ object WikiDumpImport {
     // (UDF) on one specific column, then create a new column ( .withColumn  )
 
     val parser = (s1: String, s2: String) => GraphOperator.LinkParser(s1, s2)
-
-
     // udf transform a function to an user-defined function, usable on columns
     val udfLinkParser = udf(parser)
 
@@ -61,6 +59,8 @@ object WikiDumpImport {
       .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))))
     var graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
     graph.vertices.foreach(println)
+   var most_impo =  GraphOperator.PageRank(graph)
+   
     //TODO : ecrire sur le disk
 
     ////					 Now we will extract all the edges

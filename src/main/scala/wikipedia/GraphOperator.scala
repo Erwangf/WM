@@ -5,6 +5,7 @@ import org.apache.spark.{HashPartitioner, SparkContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
+import org.apache.spark.mllib.rdd.MLPairRDDFunctions.fromPairRDD
 
 object GraphOperator {
 	/** This is a public function to be used, no object creation needed
@@ -75,8 +76,35 @@ object GraphOperator {
 	 * @param bob   the raw text to parse in order to extract references to other pages
 	 * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
 	 */
-	def PageRank(title: String, bob : Graph[String, Long]): Unit = {
-			// Run PageRank
+	def PageRank(bob : Graph[String, Long]):   Graph[String, Long] = {
+			// Run PageRank  
 			val ranks = bob.pageRank(0.0001).vertices
+					val ranksByUsername = bob.vertices.join(ranks).map {
+					case (id, (username, rank)) => (id,username,rank)
+			}
+			var a = ranksByUsername
+			.takeOrdered(10)(Ordering[Double]
+			.reverse.on { x => x._3})
+			.map(x => subgraphi(bob,ranksByUsername,x._1))
+			.flatten
+			.distinct
+			
+			bob.subgraph(vpred = (vid, attr) => a contains vid)
+	}
+	/** returns highest ranked vertex from the edges associated to a VertextId
+	 *
+	 * @param general_graph the page title (meaning the starting edge)
+	 * @param vert_by_pr   the raw text to parse in order to extract references to other pages
+	 * @param id the id of the Vertice
+	 * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
+	 */
+	def subgraphi(general_graph : Graph[String, Long], vert_by_pr : RDD[(VertexId, String, Double)], id : VertexId) : Array[VertexId] ={
+			var a = general_graph.triplets.filter(r => r.dstId == id).map(x=>x.srcId)
+					var b = general_graph.triplets.filter(r => r.srcId == id).map(x=>x.dstId)
+					var c = a.union(b).distinct.collect
+					vert_by_pr
+					.filter(r =>c contains r._1)
+					.takeOrdered(10)(Ordering[Double]
+					.reverse.on { x => x._3}).map(x => x._1)
 	}
 }
