@@ -2,7 +2,8 @@ package run.local
 
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import wikipedia.GraphOperator
+import wikipedia._
+
 import org.apache.spark.{HashPartitioner, SparkContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.graphx._
@@ -39,11 +40,17 @@ object WikiDumpImport {
 
     val parser = (s1: String, s2: String) => GraphOperator.LinkParser(s1, s2)
 
+
     // udf transform a function to an user-defined function, usable on columns
-    val udfParser = udf(parser)
+    val udfLinkParser = udf(parser)
 
     // Then we apply our spark-friendly parser function on our rows :
-    df = df.withColumn("edges", udfParser(df.col("title"), df.col("text")))
+    df = df.withColumn("edges", udfLinkParser(df.col("title"), df.col("text")))
+
+    // Next we clean the text from wikipedia markup
+    val textCleaner = (s:String)=>TextCleaner.cleanPage(s)
+    val udfTextCleaner = udf(textCleaner)
+    df = df.withColumn("text",udfTextCleaner(df.col("text")))
 
 
     //					Graph construction -> com to come
