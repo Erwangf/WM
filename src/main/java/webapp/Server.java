@@ -5,6 +5,8 @@ import org.apache.spark.sql.SparkSession;
 import spark.ResponseTransformer;
 import com.google.gson.Gson;
 
+import java.io.FileNotFoundException;
+
 import static spark.Spark.*;
 
 public class Server {
@@ -14,12 +16,12 @@ public class Server {
 
 
         // Spark Config
+        @SuppressWarnings("ConstantConditions")
         String filePath = Server.class.getClassLoader().getResource("xml.txt").getPath();
         String masterInfo = "local[*]";
         SparkSession ss = SparkSession.builder().appName("LinkParser").master(masterInfo).getOrCreate();
 
         MiningApp.init(ss);
-        MiningApp.importDump(filePath);
 
 
         // Json transformer
@@ -32,8 +34,26 @@ public class Server {
         };
 
 
-        get("/count",(req,res)-> MiningApp.pageCount());
-        get("/find/:title",(req,res)-> MiningApp.getPage(req.params("title")),jsonTransformer);
+        get("/count", (req, res) -> MiningApp.pageCount());
+
+        get("/find/:title", (req, res) -> {
+            MiningApp.Page p = MiningApp.getPage(req.params("title"));
+            return p == null ? new Object() : p;
+        }, jsonTransformer);
+
+        get("/import/local",(req,res)->{
+            try{
+                MiningApp.importPages();
+            } catch (FileNotFoundException f){
+                return "FILE NOT FOUND";
+            }
+            return "OK";
+        },jsonTransformer);
+
+        post("/import/dump",(req,res)->{
+            MiningApp.importWikiDump(req.queryParams("path"));
+            return "OK";
+        }, jsonTransformer);
 
     }
 }

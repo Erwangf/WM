@@ -26,10 +26,17 @@ object TextCleaner {
     // remove \n
     output = output.replaceAll("\n", " ")
 
+    // preserve date
+    output = output.replaceAll("\\{\\{Date.*?\\|(.*?)\\}\\}", "$1")
+
     // remove the rest of {{shit...{{other nested shit ...}} ...}} (we iterate max = 10 times) :
     0.to(10).foreach(_ => {
       output = output.replaceAll("\\{\\{[^{}]*\\}\\}", "")
     })
+
+    // remove ref
+    output = output.replaceAll("&lt;ref&gt;.*?&lt;\\/ref&gt;", "")
+    output = output.replaceAll("<ref>.*?<\\/ref>", "")
 
     // [[info (more)]] ==> [[info]]
     output = output.replaceAll("(\\[\\[[^\\]]*?)\\([^\\]]*?\\)(.*?\\]\\])", "$1$2")
@@ -43,8 +50,7 @@ object TextCleaner {
     // [[b]] ==> b
     output = output.replaceAll("\\[\\[(.+?)\\]\\]", "$1")
 
-    // remove ref
-    output = output.replaceAll("&lt;ref&gt;.*?&lt;\\/ref&gt;", "")
+
 
     // remove special characters
     output = output.replaceAll("[,;:(|)]"," ")
@@ -54,9 +60,6 @@ object TextCleaner {
 
     // delete multiple dots : . .
     output = output.replaceAll("\\. \\.",".")
-
-    // delete numbers
-    output = output.replaceAll("[0-9]","")
 
     output
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Load data</title>
+    <title>view-page</title>
     <link rel="stylesheet" href="../css/bootstrap-grid.min.css">
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -37,23 +37,28 @@
 <div class="container">
 
     <div class="welcome">
-        <h1>Load data</h1>
+        <h1>View page</h1>
     </div>
     <h4>Load data from wikipedia dump : </h4>
     <div class="form-group row">
-        <label for="dumpFileInput" class="col-2 col-form-label">path : </label>
+        <label for="titleInput" class="col-2 col-form-label">Title : </label>
         <div class="col-8">
-            <input class="form-control" placeholder="c:\myFile.txt"
-                   value="" id="dumpFileInput">
+            <input class="form-control" placeholder=""
+                   value="" id="titleInput">
         </div>
         <div class="col-2">
-            <button type="button" class="btn btn-primary" id="loadFileButton">Load</button>
+            <button type="button" class="btn btn-primary" id="findButton">Load</button>
         </div>
     </div>
+    <h4 id="title"></h4>
     <div class="row">
-        <div class="col-3"><b>Load data from local save : </b></div>
-        <div class="col-3">
-            <button type="button" id="loadLocalButton" class="btn btn-info">Load</button>
+        <div class="col-8">
+            <b>Text :</b>
+            <p id="text"></p>
+        </div>
+        <div class="col-4">
+            <b>Edges : </b>
+            <div id="edges"></div>
         </div>
     </div>
 
@@ -62,21 +67,25 @@
 <script src="../js/jquery-3.2.1.min.js"></script>
 <script src="../js/tether.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
-<script>
-    $("#loadLocalButton").click(function () {
-        $.get("/import/local", function (data) {
-            alert(data);
-        });
-    });
 
-    $("#loadFileButton").click(function () {
-        $.ajax({
-            type: "POST",
-            url: "/import/dump",
-            data: {path: $("input#dumpFileInput").val()},
-            success: function (m) {
-                alert(m)
+<script>
+    $("#findButton").click(function () {
+        $.get("/find/" + $("#titleInput").val(), function (data) {
+            var jsonData = JSON.parse(data);
+            if (!jsonData.title) {
+                alert("Error, page not found")
             }
+            else {
+                $("#title").html(jsonData.title);
+                $("#text").html(jsonData.text);
+                $("#edges").html(jsonData.edges
+                    .map(function (a) {return a._2;})
+                    .filter(function(value, index, self) {return self.indexOf(value) === index;})
+                    .sort()
+                    .join("<br/>"))
+
+            }
+
         });
     });
 </script>
