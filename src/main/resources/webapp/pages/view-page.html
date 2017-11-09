@@ -24,10 +24,16 @@
                 <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a href="load.html" class="nav-link active">Load</a>
+                <a href="../pages/view-page.html" class="nav-link active">View page</a>
+            </li>
+            <li class="nav-item">
+                <a href="load.html" class="nav-link">Load</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="options.html">Options</a>
+            </li>
+            <li class="nav-item">
+                <span class="navbar-text">App Status : <b id="status"></b></span>
             </li>
 
         </ul>
@@ -67,8 +73,10 @@
 <script src="../js/jquery-3.2.1.min.js"></script>
 <script src="../js/tether.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
+<script src="../js/common.js"></script>
 
 <script>
+    serverStatus.start("#status");
     $("#findButton").click(function () {
         $.get("/find/" + $("#titleInput").val(), function (data) {
             var jsonData = JSON.parse(data);

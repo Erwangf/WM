@@ -9,18 +9,24 @@ import run.local.WikiDumpImport
 
 import scala.collection.mutable
 
+object Status extends Enumeration {
+  val AVAILABLE, RUNNING = Value
+}
+
 object MiningApp {
 
-  final val LOCAL_PAGES_PATH = "d:\\local_pages_path.parquet"
+  private final val LOCAL_PAGES_PATH = "d:\\local_pages_path.parquet"
 
-  var pages : DataFrame = _
-  var graph : Graph[String,Long] = _
-
-  var ss : SparkSession = _
+  private var pages : DataFrame = _
+  private var graph : Graph[String,Long] = _
+  private var ss : SparkSession = _
+  private var status : Status.Value = Status.AVAILABLE
 
   def init(session:SparkSession): Unit ={
     ss = session
   }
+
+  def getStatus : Status.Value = status
 
   @throws(classOf[FileNotFoundException])
   def importPages(): Unit ={
@@ -37,9 +43,16 @@ object MiningApp {
     pages.write.mode(SaveMode.Overwrite).parquet(LOCAL_PAGES_PATH)
   }
 
-  def importWikiDump(filePath:String): Unit ={
-    pages = WikiDumpImport.importDumpAndGetDF(filePath,ss)
-    exportPages()
+  def importWikiDumpInBackground(filePath:String): Unit ={
+    status = Status.RUNNING
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        pages = WikiDumpImport.importDumpAndGetDF(filePath,ss)
+        exportPages()
+        status = Status.AVAILABLE
+      }
+    }).start()
+
   }
 
   case class Page(title:String,text:String,edges:Array[(String,String)])

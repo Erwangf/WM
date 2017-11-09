@@ -1,5 +1,4 @@
 package webapp;
-
 import app.MiningApp;
 import org.apache.spark.sql.SparkSession;
 import spark.ResponseTransformer;
@@ -14,27 +13,18 @@ public class Server {
         port(8080);
         staticFileLocation("webapp");
 
-
         // Spark Config
-        @SuppressWarnings("ConstantConditions")
-        String filePath = Server.class.getClassLoader().getResource("xml.txt").getPath();
+
         String masterInfo = "local[*]";
         SparkSession ss = SparkSession.builder().appName("LinkParser").master(masterInfo).getOrCreate();
 
         MiningApp.init(ss);
 
 
-        // Json transformer
-        ResponseTransformer jsonTransformer = new ResponseTransformer() {
-            private Gson gson = new Gson();
-            @Override
-            public String render(Object model) throws Exception {
-                return gson.toJson(model);
-            }
-        };
-
 
         get("/count", (req, res) -> MiningApp.pageCount());
+
+        get("/status",(req,res)->MiningApp.getStatus());
 
         get("/find/:title", (req, res) -> {
             MiningApp.Page p = MiningApp.getPage(req.params("title"));
@@ -51,9 +41,22 @@ public class Server {
         },jsonTransformer);
 
         post("/import/dump",(req,res)->{
-            MiningApp.importWikiDump(req.queryParams("path"));
-            return "OK";
+            MiningApp.importWikiDumpInBackground(req.queryParams("path"));
+            return "Import started";
         }, jsonTransformer);
 
+
+
+
+
     }
+
+
+    private static ResponseTransformer jsonTransformer = new ResponseTransformer() {
+        private Gson gson = new Gson();
+        @Override
+        public String render(Object model) throws Exception {
+            return gson.toJson(model);
+        }
+    };
 }
