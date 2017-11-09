@@ -72,39 +72,42 @@ object GraphOperator {
 	/** This is a public function to be used, no object creation neede
 	 * take a title and a row string to create an Array of vertices
 	 *
-	 * @param title the page title (meaning the starting edge)
-	 * @param bob   the raw text to parse in order to extract references to other pages
-	 * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
+	 * @param bob   the graph
+	 * @param sc	SparkContext
+	 * @return Array[Long] ID with highest pageRank values and their neighboors with highest pagerank value (10x10)
 	 */
-	def PageRank(bob : Graph[String, Long]):   Graph[String, Long] = {
-			// Run PageRank  
-			val ranks = bob.pageRank(0.0001).vertices
-					val ranksByUsername = bob.vertices.join(ranks).map {
-					case (id, (username, rank)) => (id,username,rank)
-			}
-			var a = ranksByUsername
-			.takeOrdered(10)(Ordering[Double]
-			.reverse.on { x => x._3})
-			.map(x => subgraphi(bob,ranksByUsername,x._1))
-			.flatten
-			.distinct
-			
-			bob.subgraph(vpred = (vid, attr) => a contains vid)
-	}
-	/** returns highest ranked vertex from the edges associated to a VertextId
-	 *
-	 * @param general_graph the page title (meaning the starting edge)
-	 * @param vert_by_pr   the raw text to parse in order to extract references to other pages
-	 * @param id the id of the Vertice
-	 * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
-	 */
-	def subgraphi(general_graph : Graph[String, Long], vert_by_pr : RDD[(VertexId, String, Double)], id : VertexId) : Array[VertexId] ={
-			var a = general_graph.triplets.filter(r => r.dstId == id).map(x=>x.srcId)
-					var b = general_graph.triplets.filter(r => r.srcId == id).map(x=>x.dstId)
-					var c = a.union(b).distinct.collect
-					vert_by_pr
-					.filter(r =>c contains r._1)
+	def pageRanker(bob : Graph[String, Long], sc : SparkContext):  Array[Long] = {
+			//	  Constant
+			val direction: EdgeDirection=EdgeDirection.Either
+					// Run PageRank  
+					val ranks = bob.pageRank(0.0001).vertices
+					//					On garde slmnt les + importants (les 10)
+					val mostImp = ranks
 					.takeOrdered(10)(Ordering[Double]
-					.reverse.on { x => x._3}).map(x => x._1)
+							.reverse.on { x => x._2})
+					.map(x => x._1)
+
+					var best_graph =sc.parallelize(bob.collectNeighborIds(direction).filter(x=>mostImp contains x._1)
+							.map(x =>  x._2.map(i => (x._1,i)))
+							.flatMap(x => x).collect())
+							
+					var	best_graph2 = best_graph
+					.map(_.swap).join(ranks).map {
+					case (nei, (src, rank)) => (src,(nei,rank))
+	        }
+	        .groupByKey()
+	        
+	        var out1 = best_graph2
+	        .map(x => (x._1,x._2.toList.sortBy(_._2).take(10)))
+	        .flatMap{
+	          case (id,arr) => arr.map(i => (id,i._1))
+	          }
+//	        
+	        
+	        var out = out1.collect().map(x => x._2)
+	        .union(
+	            out1.collect().map(x => x._1)
+	            ).distinct
+	        out
 	}
 }
