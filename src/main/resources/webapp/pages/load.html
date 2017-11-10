@@ -75,7 +75,6 @@
 
     $("#loadLocalButton").click(function () {
         $.get("/import/local", function (data) {
-            alert(data);
         });
     });
 
@@ -85,7 +84,6 @@
             url: "/import/dump",
             data: {path: $("input#dumpFileInput").val()},
             success: function (m) {
-                alert(m)
             }
         });
     });

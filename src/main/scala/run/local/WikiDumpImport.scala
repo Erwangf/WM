@@ -22,7 +22,7 @@ object WikiDumpImport {
 
   }
 
-  def importDumpAndGetDF(filePath: String, ss: SparkSession): DataFrame = {
+  def importDumpAndGetDF(filePath: String, ss: SparkSession): (DataFrame,Graph[String,Long]) = {
 
     val sqlContext = ss.sqlContext
     var df = sqlContext.read
@@ -55,19 +55,16 @@ object WikiDumpImport {
 
 
     //					Graph construction -> com to come
-    import ss.implicits._
     var a = ss.sparkContext.parallelize(df.select("edges")
       .take(10).flatMap(_.get(0)
       .asInstanceOf[mutable.WrappedArray[Row]]
       .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))))
 
     var graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
-    var ind = GraphOperator.pageRanker(graph, ss.sparkContext)
-    ind.foreach(x => println(x))
-    graph.vertices.filter(x => ind contains x._1).foreach(println(_))
+
 
     // we return the dataframe df
-    df
+    (df,graph)
   }
 
 

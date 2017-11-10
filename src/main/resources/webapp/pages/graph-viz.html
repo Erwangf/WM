@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Options</title>
+    <title>Graph viz</title>
     <link rel="stylesheet" href="../css/bootstrap-grid.min.css">
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -45,13 +45,22 @@
 </nav>
 
 <div class="container">
-
-    <div class="welcome">
-        <h1>Graph visualisation</h1>
-    </div>
+    <div class="text-center"><h1>Linked pages graph visualisation</h1></div>
     <div>
 
-        <div id="mynetwork" style="height: 500px;">
+        <div id="mynetwork" style="height: 600px; border: 1px solid #000;">
+            <div class="sk-cube-grid">
+                <p>Loading</p>
+                <div class="sk-cube sk-cube1"></div>
+                <div class="sk-cube sk-cube2"></div>
+                <div class="sk-cube sk-cube3"></div>
+                <div class="sk-cube sk-cube4"></div>
+                <div class="sk-cube sk-cube5"></div>
+                <div class="sk-cube sk-cube6"></div>
+                <div class="sk-cube sk-cube7"></div>
+                <div class="sk-cube sk-cube8"></div>
+                <div class="sk-cube sk-cube9"></div>
+            </div>
         </div>
 
 
@@ -68,51 +77,53 @@
 <script>
     serverStatus.start("#status");
 
-    // create an array with nodes
-    var nodes = new vis.DataSet([
-        {id: 1, label: 'Node 1'},
-        {id: 2, label: 'Node 2'},
-        {id: 3, label: 'Node 3'},
-        {id: 4, label: 'Node 4'},
-        {id: 5, label: 'Node 5'},
-        {id: 6, label: 'Node 6'},
-        {id: 7, label: 'Node 7'},
-        {id: 8, label: 'Node 8'},
-        {id: 9, label: 'Node 9'},
-        {id: 10, label: 'Node 10'},
-        {id: 11, label: 'Node 11'},
-        {id: 12, label: 'Node 12'},
-        {id: 13, label: 'Node 13'}
-    ]);
+    $.get("/graph/bestRank", function (result) {
 
-    // create an array with edges
-    var edges = new vis.DataSet([
-        {from: 1, to: 3},
-        {from: 1, to: 2},
-        {from: 6, to: 4},
-        {from: 2, to: 5},
-        {from: 3, to: 3},
-        {from: 5, to: 13},
-        {from: 8, to: 11},
-        {from: 7, to: 12},
-        {from: 12, to: 4},
-        {from: 2, to: 5},
-        {from: 8, to: 9},
-        {from: 9, to: 13},
-        {from: 11, to: 10},
-        {from: 3, to: 11},
-        {from: 7, to: 10},
-        {from: 9, to: 2}
-    ]);
+        var r = JSON.parse(result);
 
-    // create a network
-    var container = document.getElementById('mynetwork');
-    var data = {
-        nodes: nodes,
-        edges: edges
-    };
-    var options = {};
-    var network = new vis.Network(container, data, options);
+        var nodes = new vis.DataSet(r.vertices.map(function (v) {
+            return {
+                id: v.id,
+                label: v.label.replaceAll(" ", "\n"),
+                font: {
+                    color: "#f2f2f2"
+                },
+                color: {
+                    background: '#333333',
+                    border: '#000',
+                    highlight: {
+                        background: '#333333',
+                        border: '#000'
+                    },
+                    hover: {
+                        background: '#333333',
+                        border: '#000'
+                    }
+                }
+            }
+
+        }));
+        var edges = new vis.DataSet(r.edges);
+
+        // create a network
+        var container = document.getElementById('mynetwork');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {
+            interaction: {
+                hideEdgesOnDrag: true
+            },
+            physics: false
+        };
+        $("#mynetwork").html("");
+        var network = new vis.Network(container, data, options);
+
+
+    })
+
+
 </script>
 
 </body>

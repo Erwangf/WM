@@ -34,6 +34,7 @@ public class Server {
         get("/import/local",(req,res)->{
             try{
                 MiningApp.importPages();
+                MiningApp.importGraph();
             } catch (FileNotFoundException f){
                 return "FILE NOT FOUND";
             }
@@ -44,6 +45,8 @@ public class Server {
             MiningApp.importWikiDumpInBackground(req.queryParams("path"));
             return "Import started";
         }, jsonTransformer);
+
+        get("/graph/bestRank",(req,res)->MiningApp.getBestPageRankGraph(),jsonTransformer);
 
 
 

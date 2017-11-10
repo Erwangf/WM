@@ -115,3 +115,5 @@ crashlytics-build.properties
 *.iml
 
 spark-warehouse
+
+tmp
