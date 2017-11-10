@@ -33,8 +33,7 @@ public class Server {
 
         get("/import/local",(req,res)->{
             try{
-                MiningApp.importPages();
-                MiningApp.importGraph();
+                MiningApp.importLocal();
             } catch (FileNotFoundException f){
                 return "FILE NOT FOUND";
             }
