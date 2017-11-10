@@ -61,6 +61,8 @@ object TextCleaner {
     // delete multiple dots : . .
     output = output.replaceAll("\\. \\.",".")
 
+//    replace diagonal quotes
+    output = output.replaceAll("\\’","\\'")
     output
 
   }

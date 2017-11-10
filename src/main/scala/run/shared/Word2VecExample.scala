@@ -27,7 +27,10 @@ object Word2VecExample {
     val model = word2Vec.fit(documentDF)
 
     // compute words of the corpus
-    val result = model.transform(lines.filter(_.length>0).flatMap(_.split(" ")).distinct().map(Array(_)).toDF("text"))
+    var tempTT2 = lines.filter(_.length>0).flatMap(_.split(" "))
+    
+    var tempTT =tempTT2.distinct().map(Array(_)).toDF("text")
+    val result = model.transform(tempTT)
 
 
     val coords = model.transform(
