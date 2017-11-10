@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Options</title>
+    <link rel="stylesheet" href="../css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/vis.min.css">
+</head>
+<body>
+
+
+<nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+            data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/">Wikipedia-mining</a>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="../pages/view-page.html" class="nav-link">View page</a>
+            </li>
+            <li class="nav-item">
+                <a href="load.html" class="nav-link">Load</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="graph-viz.html">Graph Viz</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="options.html">Options</a>
+            </li>
+            <li class="nav-item">
+                <span class="navbar-text">App Status : <b id="status"></b></span>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="welcome">
+        <h1>Graph visualisation</h1>
+    </div>
+    <div>
+
+        <div id="mynetwork" style="height: 500px;">
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<script src="../js/jquery-3.2.1.min.js"></script>
+<script src="../js/tether.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/vis.min.js"></script>
+<script src="../js/common.js"></script>
+<script>
+    serverStatus.start("#status");
+
+    // create an array with nodes
+    var nodes = new vis.DataSet([
+        {id: 1, label: 'Node 1'},
+        {id: 2, label: 'Node 2'},
+        {id: 3, label: 'Node 3'},
+        {id: 4, label: 'Node 4'},
+        {id: 5, label: 'Node 5'},
+        {id: 6, label: 'Node 6'},
+        {id: 7, label: 'Node 7'},
+        {id: 8, label: 'Node 8'},
+        {id: 9, label: 'Node 9'},
+        {id: 10, label: 'Node 10'},
+        {id: 11, label: 'Node 11'},
+        {id: 12, label: 'Node 12'},
+        {id: 13, label: 'Node 13'}
+    ]);
+
+    // create an array with edges
+    var edges = new vis.DataSet([
+        {from: 1, to: 3},
+        {from: 1, to: 2},
+        {from: 6, to: 4},
+        {from: 2, to: 5},
+        {from: 3, to: 3},
+        {from: 5, to: 13},
+        {from: 8, to: 11},
+        {from: 7, to: 12},
+        {from: 12, to: 4},
+        {from: 2, to: 5},
+        {from: 8, to: 9},
+        {from: 9, to: 13},
+        {from: 11, to: 10},
+        {from: 3, to: 11},
+        {from: 7, to: 10},
+        {from: 9, to: 2}
+    ]);
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {};
+    var network = new vis.Network(container, data, options);
+</script>
+
+</body>
+</html>

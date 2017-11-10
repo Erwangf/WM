@@ -60,38 +60,11 @@ object WikiDumpImport {
       .take(10).flatMap(_.get(0)
       .asInstanceOf[mutable.WrappedArray[Row]]
       .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))))
+
     var graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
-    //					graph.vertices.foreach(println)
-    val direction: EdgeDirection = EdgeDirection.Either
-    //			   var bob = graph.collectNeighborIds(direction).lookup(189).flatten.foreach(println(_))
     var ind = GraphOperator.pageRanker(graph, ss.sparkContext)
     ind.foreach(x => println(x))
     graph.vertices.filter(x => ind contains x._1).foreach(println(_))
-
-    //					most_impo.vertices.foreach(x=> println(x._1 +" "+ x._2))
-    //TODO : ecrire sur le disk
-
-    ////					 Now we will extract all the edges
-    ////					 first we take 1000 edges, then convert Array[WrappedArray[Row]] to Array[WrappedArray[(String,String)]]
-    ////					 That's because when importing a Tuple (String,String), Spark convert it to a struct, which is basically a Row.
-    ////					 So we got Rows (our edges) containings Rows (origin,destination)... :p
-    //												    df.select("edges")
-    //												      .take(10)
-    //												      .map(_.get(0)
-    //												        .asInstanceOf[mutable.WrappedArray[Row]]
-    //												        .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))
-    //												      ) // then we print all this edges
-    //					      .foreach(e => e.foreach(i => println(i._1 + ";" + i._2)))
-    ////					 Calculate number of vertices and edges with a Reduce
-    ////					 we need to import sparkSession.implicits._ in order to map Row into Tuple
-    //					    import ss.implicits._
-    //					    val counts = df
-    //					      .map(r => (1, r.get(r.fieldIndex("edges")).asInstanceOf[mutable.WrappedArray[Row]].length))
-    //					      .reduce((a, b) => (a._1 + b._1, a._2 + b._2))
-    //					    println(s"Nb Vertices : ${counts._1}\nNb Edges : ${counts._2}")
-
-
-    //TODO : Clean text
 
     // we return the dataframe df
     df
