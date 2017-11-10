@@ -64,7 +64,7 @@ object WordEmbedding {
 			val result = model.transform(vocab)
 			model
 			//			val synonyms = model.findSynonyms("adolfo", 10)
-			//			val synonyms = model.findSynonyms("publiés", 5)
+			//			val synonyms = model.findSynonyms("publiÃ©s", 5)
 			//			synonyms.select(synonyms.columns(0)).map(x=>x.get(0).asInstanceOf[String]).foreach(println(_))
 			//
 			//			val coords = model.transform(
@@ -82,7 +82,7 @@ object WordEmbedding {
 
 	}
 	/**Get vocabulary from  Word2VecModel 
-	 * @param Word2VecModel Model from WordEmbedding learning
+	 * @param mod Word2VecModel from WordEmbedding learning
 	 * @param ss the current Spark Session
 	 * @return RDD[String]
 	 */

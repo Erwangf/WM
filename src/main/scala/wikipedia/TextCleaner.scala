@@ -62,7 +62,7 @@ object TextCleaner {
     output = output.replaceAll("\\. \\.",".")
 
 //    replace diagonal quotes
-    output = output.replaceAll("\\’","\\'")
+    output = output.replaceAll("\\â€™","\\'")
     output
 
   }

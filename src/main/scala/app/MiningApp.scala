@@ -39,7 +39,7 @@ object MiningApp {
 
 
   @throws(classOf[FileNotFoundException])
-  def importPages(): Unit = {
+  private def importPages(): Unit = {
     if (Files.exists(Paths.get(LOCAL_PAGES_PATH))) {
       pages = ss.read.parquet(LOCAL_PAGES_PATH)
     }
@@ -81,13 +81,25 @@ object MiningApp {
   }
 
   @throws(classOf[FileNotFoundException])
-  def importGraph(): Unit = {
+  private def importGraph(): Unit = {
     if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH)) && Files.exists(Paths.get(LOCAL_GRAPH_EDGES_PATH))) {
       val vertices = ss.sparkContext.objectFile[(VertexId, String)](LOCAL_GRAPH_VERTICES_PATH)
       val edges = ss.sparkContext.objectFile[Edge[Long]](LOCAL_GRAPH_EDGES_PATH)
       graph = Graph[String, Long](vertices, edges)
     }
     else throw new FileNotFoundException()
+  }
+  @throws(classOf[FileNotFoundException])
+  def importLocal():Unit = {
+    status = Status.RUNNING
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        importGraph()
+        importPages()
+        status = Status.AVAILABLE
+      }
+    }).start()
+
   }
 
   def importWikiDumpInBackground(filePath: String): Unit = {
