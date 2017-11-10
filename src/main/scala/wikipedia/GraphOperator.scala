@@ -71,7 +71,7 @@ object GraphOperator {
     Graph(vertices, edges).partitionBy(PartitionStrategy.EdgePartition2D)
   }
 
-  /** This is a public function to be used, no object creation neede
+  /** This is a public function to be used, no object creation needed
     * take a title and a row string to create an Array of vertices
     *
     * @param bob the graph
