@@ -71,22 +71,22 @@ object GraphOperator {
 			Graph(vertices, edges).partitionBy(PartitionStrategy.EdgePartition2D)
 	}
 
-	/** This is a public function to be used, no object creation neede
-	 * take a title and a row string to create an Array of vertices
-	 *
-	 * @param bob the graph
-	 * @param sc  SparkContext
-	 * @return Array[Long] ID with highest pageRank values and their neighboors with highest pagerank value (10x10)
-	 */
-	def pageRanker(bob: Graph[String, Long], sc: SparkContext): Array[Long] = {
-			//	  Constant
-			val direction: EdgeDirection = EdgeDirection.Either
-					// Run PageRank
-					val ranks = bob.pageRank(0.0001).vertices
-					//					On garde slmnt les + importants (les 10)
-					val mostImp = ranks
-					.takeOrdered(10)(Ordering[Double].reverse.on { x => x._2 })
-					.map(x => x._1)
+  /** This is a public function to be used, no object creation needed
+    * take a title and a row string to create an Array of vertices
+    *
+    * @param bob the graph
+    * @param sc  SparkContext
+    * @return Array[Long] ID with highest pageRank values and their neighboors with highest pagerank value (10x10)
+    */
+  def pageRanker(bob: Graph[String, Long], sc: SparkContext): Array[Long] = {
+    //	  Constant
+    val direction: EdgeDirection = EdgeDirection.Either
+    // Run PageRank
+    val ranks = bob.pageRank(0.0001).vertices
+    //					On garde slmnt les + importants (les 10)
+    val mostImp = ranks
+      .takeOrdered(10)(Ordering[Double].reverse.on { x => x._2 })
+      .map(x => x._1)
 
 					val best_graph = sc.parallelize(bob.collectNeighborIds(direction).filter(x => mostImp contains x._1)
 							.map(x => x._2.map(i => (x._1, i)))
