@@ -1,6 +1,7 @@
 package app
 
 import java.io.FileNotFoundException
+import java.io.File
 import java.nio.file.{Files, Paths}
 
 import org.apache.hadoop.conf.Configuration
@@ -26,6 +27,7 @@ object MiningApp {
   private var graph: Graph[String, Long] = _
   private var ss: SparkSession = _
   private var status: Status.Value = Status.AVAILABLE
+  private var loadedFile : String = "NA"
 
   import org.apache.hadoop.fs.FileSystem
 
@@ -36,7 +38,7 @@ object MiningApp {
   }
 
   def getStatus: Status.Value = status
-
+  def getLoadedFile(): String =  loadedFile
 
   @throws(classOf[FileNotFoundException])
   private def importPages(): Unit = {
@@ -97,6 +99,7 @@ object MiningApp {
         importGraph()
         importPages()
         status = Status.AVAILABLE
+        loadedFile = "localStoredDF"
       }
     }).start()
 
@@ -113,6 +116,7 @@ object MiningApp {
         exportPages()
         exportGraph()
         status = Status.AVAILABLE
+        loadedFile = (new File(filePath)).getName()
       }
     }).start()
 

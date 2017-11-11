@@ -92,5 +92,19 @@ object WordEmbedding {
 			mod.getVectors
 			.select("word")
 			.rdd.map(x=>x.get(0).asInstanceOf[String])
-	}
+	}  
+		/**Sum two word vectors and get the resulting vector
+	 * @param mod Word2VecModel from WordEmbedding learning
+	 * @param ss the current Spark Session
+	 * @return RDD[String]
+	 */
+	def sumWords(mod : Word2VecModel,ss : SparkSession,word1 : String,word2 : String): String  ={
+			import ss.sqlContext.implicits._
+			var space = mod.getVectors
+			var v1 = space.filter(space("word")===word1).first().asInstanceOf[(String,Array[Float])]
+			var v2 = space.filter(space("word")===word2).first().asInstanceOf[(String,Array[Float])]
+//			.select("word")
+//			.rdd.map(x=>x.get(0).asInstanceOf[String])
+						"nn"
+	}  
 }

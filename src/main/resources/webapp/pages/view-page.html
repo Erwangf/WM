@@ -32,6 +32,9 @@
             <li class="nav-item">
                 <a class="nav-link" href="options.html">Options</a>
             </li>
+			<li class="nav-item">
+                <span id="loadedFile" class="navbar-text" style="padding-right : 8pt; color:green;display : none"></span>
+            </li>		
             <li class="nav-item">
                 <span class="navbar-text">App Status : <b id="status"></b></span>
             </li>
@@ -76,6 +79,12 @@
 <script src="../js/common.js"></script>
 
 <script>
+	$.get("/loadedFile", function (data) {
+            if (data!="NA") {
+                $("#loadedFile").html(data);
+				$("#loadedFile").display.show();
+            }
+        });
     serverStatus.start("#status");
     $("#findButton").click(function () {
         $.get("/find/" + $("#titleInput").val(), function (data) {

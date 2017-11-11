@@ -25,7 +25,8 @@ public class Server {
         get("/count", (req, res) -> MiningApp.pageCount());
 
         get("/status",(req,res)->MiningApp.getStatus());
-
+        get("/loadedFile",(req,res)->MiningApp.getLoadedFile());
+        
         get("/find/:title", (req, res) -> {
             MiningApp.Page p = MiningApp.getPage(req.params("title"));
             return p == null ? new Object() : p;
