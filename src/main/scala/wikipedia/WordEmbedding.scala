@@ -93,18 +93,35 @@ object WordEmbedding {
 			.select("word")
 			.rdd.map(x=>x.get(0).asInstanceOf[String])
 	}  
-		/**Sum two word vectors and get the resulting vector
+	/**Sum two word vectors and get the resulting vector
 	 * @param mod Word2VecModel from WordEmbedding learning
 	 * @param ss the current Spark Session
 	 * @return RDD[String]
-	 */
-	def sumWords(mod : Word2VecModel,ss : SparkSession,word1 : String,word2 : String): String  ={
+	 */  
+	def sumWords(mod : Word2VecModel,ss : SparkSession,word1 : String,word2 : String, num_results : Int, minus : Boolean): Array[String]  ={
 			import ss.sqlContext.implicits._
 			var space = mod.getVectors
-			var v1 = space.filter(space("word")===word1).first().asInstanceOf[(String,Array[Float])]
-			var v2 = space.filter(space("word")===word2).first().asInstanceOf[(String,Array[Float])]
-//			.select("word")
-//			.rdd.map(x=>x.get(0).asInstanceOf[String])
-						"nn"
+			val w1 = space.filter($"word"===word1.toLowerCase())
+			.first()(1)
+			.asInstanceOf[DenseVector].values
+				var w2 = space.filter($"word"===word2.toLowerCase())
+			.first()(1)
+			.asInstanceOf[DenseVector].values
+			if(minus == true){
+				w2 = VectorMath.opposite(w2)
+			}
+			var result = new DenseVector(VectorMath.addVec(w1, w2))
+			var bob = mod.findSynonyms(result,num_results)
+			bob.foreach(x=>println(x(0)))
+			//			.map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[DenseVector].values))
+//			println(w1)
+			//			val w2 = space.filter($"word"===word2.toLowerCase()).first().asInstanceOf[(String,Array[Float])]
+			//			println(w2)
+			//			space.
+			//			var v1 = space.filter(space("word")===word1).first().asInstanceOf[(String,Array[Float])]
+			//			var v2 = space.filter(space("word")===word2).first().asInstanceOf[(String,Array[Float])]
+			//			.select("word")
+			//			.rdd.map(x=>x.get(0).asInstanceOf[String])
+			bob.map(x=>x(0).asInstanceOf[String]).collect()
 	}  
 }

@@ -62,8 +62,11 @@ object WikiDumpImport {
 
     var graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
     
-   var model = WordEmbedding.runWord2Vec(ss, df, 50, 3, 10)
-   var result = WordEmbedding.sumWords(model,ss,"Antoine","adolfo")
+   var model = WordEmbedding.runWord2Vec(ss, df, 50, 3, 2)
+//   var vocab =  WordEmbedding.getVocabulary(model,ss)
+//   vocab.foreach(println(_))
+   var result = WordEmbedding.sumWords(model,ss,"Antoine","adolfo",3,false)
+   result.foreach(println(_))
     // we return the dataframe df
     (df,graph)
   }

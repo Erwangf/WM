@@ -27,4 +27,12 @@ object VectorMath {
     }
     result
   }
+    def opposite(a: Array[Double]): Array[Double] = {
+    var result: Array[Double] = Array()
+
+    for (elem <- a.indices) {
+      result = result :+ (a(elem) * -1)
+    }
+    result
+  }
 }
