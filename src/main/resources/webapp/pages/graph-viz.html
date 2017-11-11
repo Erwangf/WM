@@ -82,7 +82,7 @@
 	$.get("/loadedFile", function (data) {
             if (data!="NA") {
                 $("#loadedFile").html(data);
-				$("#loadedFile").display.show();
+				$("#loadedFile").show();
             }
         });
     $.get("/graph/bestRank", function (result) {
