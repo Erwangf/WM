@@ -1,24 +1,12 @@
 package wikipedia
 
-import org.apache.spark.ml.feature.Word2Vec
-import org.apache.spark.ml.feature.Word2VecModel
+import org.apache.spark.ml.feature.{Word2Vec, Word2VecModel}
 import org.apache.spark.ml.linalg.DenseVector
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import tool.VectorMath
 
 import scala.collection.mutable
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions._
-import wikipedia._
-
-import org.apache.spark.{HashPartitioner, SparkContext}
-import org.apache.spark.SparkContext._
-import org.apache.spark.graphx._
-import org.apache.spark.rdd.RDD
-
-import scala.collection.mutable
-import scala.util.matching.Regex
-import org.apache.spark.sql.types._
 
 object WordEmbedding {
 	/**Perform a word embedding on text dataframe and return the model
@@ -87,8 +75,6 @@ object WordEmbedding {
 	 * @return RDD[String]
 	 */
 	def getVocabulary(mod : Word2VecModel,ss : SparkSession): RDD[String]  ={
-
-			import ss.sqlContext.implicits._
 			mod.getVectors
 			.select("word")
 			.rdd.map(x=>x.get(0).asInstanceOf[String])
@@ -97,7 +83,7 @@ object WordEmbedding {
 	 * @param mod Word2VecModel from WordEmbedding learning
 	 * @param ss the current Spark Session
 	 * @return RDD[String]
-	 */  
+	 */
 	def sumWords(mod : Word2VecModel,ss : SparkSession,word1 : String,word2 : String, num_results : Int, minus : Boolean): Array[String]  ={
 			import ss.sqlContext.implicits._
 			var space = mod.getVectors
@@ -107,7 +93,7 @@ object WordEmbedding {
 				var w2 = space.filter($"word"===word2.toLowerCase())
 			.first()(1)
 			.asInstanceOf[DenseVector].values
-			if(minus == true){
+			if(minus){
 				w2 = VectorMath.opposite(w2)
 			}
 			var result = new DenseVector(VectorMath.addVec(w1, w2))
