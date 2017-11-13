@@ -10,7 +10,29 @@ object TextCleaner {
     */
   def cleanPage(text: String): String = {
     var output = text
-
+    var index_start_tag = output.indexOf("<")
+    var eq = false
+    if(index_start_tag != -1){
+      eq = true
+    }
+     while(eq){
+        var index_end_tag = output.indexOf(">",index_start_tag+1)
+//        println(index_end_tag)
+        var label_tag = "/"+output.substring(index_start_tag+1,index_end_tag)
+//        println(label_tag)
+        var index_closing_tag = output.indexOf(label_tag,index_end_tag)
+//        println(index_closing_tag)
+        var out = index_closing_tag+label_tag.length+1
+//        println(output.substring(index_start_tag,out))
+       output = output.substring(0,index_start_tag-1) + output.substring(out+1)
+//       println(output)
+       index_start_tag = output.indexOf("<")
+//       println(index_start_tag)
+       if(index_start_tag == -1){
+                eq = false
+       }
+    }
+    println(output)
     //[[info]] ([move info and links]) ==> [[info]]
     output = output.replaceAll("(\\[\\[.*?\\]\\]).*?\\(\\[.*?\\]\\)", "$1")
 
@@ -36,7 +58,7 @@ object TextCleaner {
 
     // remove ref
     output = output.replaceAll("&lt;ref&gt;.*?&lt;\\/ref&gt;", "")
-    output = output.replaceAll("<ref>.*?<\\/ref>", "")
+//    output = output.replaceAll("<ref>.*?<\\/ref>", "")
 
     // [[info (more)]] ==> [[info]]
     output = output.replaceAll("(\\[\\[[^\\]]*?)\\([^\\]]*?\\)(.*?\\]\\])", "$1$2")
