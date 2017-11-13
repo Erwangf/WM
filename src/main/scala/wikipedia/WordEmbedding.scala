@@ -5,6 +5,7 @@ import org.apache.spark.ml.feature.Word2VecModel
 import org.apache.spark.ml.linalg.DenseVector
 import org.apache.spark.sql.SparkSession
 import tool.VectorMath
+import org.apache.spark.sql.SaveMode
 
 import scala.collection.mutable
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -62,6 +63,7 @@ object WordEmbedding {
 			.foreach(println(_))
 			// compute words of the corpus
 			val result = model.transform(vocab)
+			model.getVectors.rdd.saveAsTextFile(s"D:/Bureau/bob")
 			model
 			//			val synonyms = model.findSynonyms("adolfo", 10)
 			//			val synonyms = model.findSynonyms("publiés", 5)
@@ -93,7 +95,7 @@ object WordEmbedding {
 			.select("word")
 			.rdd.map(x=>x.get(0).asInstanceOf[String])
 	}  
-	/**Sum two word vectors and get the resulting vector
+	/**Sum two word vectors and get the resulting vector as closest words
 	 * @param mod Word2VecModel from WordEmbedding learning
 	 * @param ss the current Spark Session
 	 * @return RDD[String]
@@ -113,15 +115,6 @@ object WordEmbedding {
 			var result = new DenseVector(VectorMath.addVec(w1, w2))
 			var bob = mod.findSynonyms(result,num_results)
 			bob.foreach(x=>println(x(0)))
-			//			.map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[DenseVector].values))
-//			println(w1)
-			//			val w2 = space.filter($"word"===word2.toLowerCase()).first().asInstanceOf[(String,Array[Float])]
-			//			println(w2)
-			//			space.
-			//			var v1 = space.filter(space("word")===word1).first().asInstanceOf[(String,Array[Float])]
-			//			var v2 = space.filter(space("word")===word2).first().asInstanceOf[(String,Array[Float])]
-			//			.select("word")
-			//			.rdd.map(x=>x.get(0).asInstanceOf[String])
 			bob.map(x=>x(0).asInstanceOf[String]).collect()
 	}  
 }
