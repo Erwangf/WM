@@ -22,7 +22,7 @@ object WikiDumpImport {
 
   }
 
-  def importDumpAndGetDF(filePath: String, ss: SparkSession): (DataFrame,Graph[String,Long]) = {
+  def importDumpAndGetDF(filePath: String, ss: SparkSession): (DataFrame, Graph[String, Long]) = {
 
     val sqlContext = ss.sqlContext
     var df = sqlContext.read
@@ -53,8 +53,6 @@ object WikiDumpImport {
     val udfTextCleaner = udf(textCleaner)
     df = df.withColumn("text", udfTextCleaner(df.col("text")))
 
-
-    //					Graph construction -> com to come
     var a = ss.sparkContext.parallelize(df.select("edges")
       .take(10).flatMap(_.get(0)
       .asInstanceOf[mutable.WrappedArray[Row]]
@@ -68,7 +66,7 @@ object WikiDumpImport {
    var result = WordEmbedding.sumWords(model,ss,"Antoine","adolfo",3,false)
    result.foreach(println(_))
     // we return the dataframe df
-    (df,graph)
+    (df, graph)
   }
 
 

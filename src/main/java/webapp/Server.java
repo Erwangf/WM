@@ -16,7 +16,10 @@ public class Server {
         // Spark Config
 
         String masterInfo = "local[*]";
-        SparkSession ss = SparkSession.builder().appName("LinkParser").master(masterInfo).getOrCreate();
+        SparkSession ss = SparkSession.builder()
+                .appName("LinkParser")
+                .master(masterInfo)
+                .getOrCreate();
 
         MiningApp.init(ss);
 

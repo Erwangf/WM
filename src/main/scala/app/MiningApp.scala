@@ -91,8 +91,9 @@ object MiningApp {
     }
     else throw new FileNotFoundException()
   }
+
   @throws(classOf[FileNotFoundException])
-  def importLocal():Unit = {
+  def importLocal(): Unit = {
     status = Status.RUNNING
     new Thread(new Runnable {
       override def run(): Unit = {
@@ -147,7 +148,8 @@ object MiningApp {
   case class EdgesAndVertices(edges: Array[EdgeLight], vertices: Array[VertexLight])
 
   case class EdgeLight(from: Long, to: Long)
-  case class VertexLight(id:Long,label:String)
+
+  case class VertexLight(id: Long, label: String)
 
   def getBestPageRankGraph: EdgesAndVertices = {
     var ind = GraphOperator.pageRanker(graph, ss.sparkContext)
