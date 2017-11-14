@@ -53,38 +53,25 @@ object WordEmbedding {
 			val result = model.transform(vocab)
 			model.getVectors.rdd.saveAsTextFile(s"D:/Bureau/bob")
 			model
-			//			val synonyms = model.findSynonyms("adolfo", 10)
-			//			val synonyms = model.findSynonyms("publiés", 5)
-			//			synonyms.select(synonyms.columns(0)).map(x=>x.get(0).asInstanceOf[String]).foreach(println(_))
-			//
-			//			val coords = model.transform(
-			//					ss.sqlContext.createDataFrame(Seq(targetWord)
-			//							.map(Array(_)).map(Tuple1.apply)).toDF("text")).collect()
-			//			val myWordVec = coords(0).get(1).asInstanceOf[DenseVector].values
-			//
-			//			result
-			//			.collect()
-			//			.map(r => (r.get(0).asInstanceOf[mutable.WrappedArray[String]], r.get(1).asInstanceOf[DenseVector].values))
-			//			.map(r => (r._1.asInstanceOf[mutable.WrappedArray[String]].reduce(_ + " " + _), VectorMath.distVec(r._2, myWordVec)))
-			//			.sortBy[Double](r => r._2)
-			//			.take(20)
-
-
 	}
-	/**Get vocabulary from  Word2VecModel 
-	 * @param mod Word2VecModel from WordEmbedding learning
+	/**Get vocabulary from  a Word2VecModel 
+	 * @param mod Word2VecModel from a previous Word2Vec learning
 	 * @param ss the current Spark Session
-	 * @return RDD[String]
+	 * @return RDD[String] a list of the vocabulary
 	 */
 	def getVocabulary(mod : Word2VecModel,ss : SparkSession): RDD[String]  ={
 			mod.getVectors
 			.select("word")
 			.rdd.map(x=>x.get(0).asInstanceOf[String])
 	}  
-	/**Sum two word vectors and get the resulting vector as closest words
+	/**Sum two word vectors and get the resulting vector as a list of the closest words
 	 * @param mod Word2VecModel from WordEmbedding learning
 	 * @param ss the current Spark Session
-	 * @return RDD[String]
+	 * @param word1 the first word to sum
+	 * @param word2 the second, if minus is true, word2 vector representation is inverted
+	 * @param num_results the number of closest words to return
+	 * @param minus if true, the word2 is substracted to the first
+	 * @return RDD[String] list of the closest words to the sum vector (the first being the closest)
 	 */
 	def sumWords(mod : Word2VecModel,ss : SparkSession,word1 : String,word2 : String, num_results : Int, minus : Boolean): Array[String]  ={
 			import ss.sqlContext.implicits._
@@ -98,8 +85,9 @@ object WordEmbedding {
 			if(minus){
 				w2 = VectorMath.opposite(w2)
 			}
-			var result = new DenseVector(VectorMath.addVec(w1, w2))
-			var bob = mod.findSynonyms(result,num_results)
+			var vec_result = new DenseVector(VectorMath.addVec(w1, w2))
+			
+			var bob = mod.findSynonyms(vec_result,num_results)
 			bob.foreach(x=>println(x(0)))
 			bob.map(x=>x(0).asInstanceOf[String]).collect()
 	}  
