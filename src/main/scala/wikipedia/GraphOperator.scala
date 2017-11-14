@@ -8,9 +8,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.mllib.rdd.MLPairRDDFunctions.fromPairRDD
 
 object GraphOperator {
-  /** This is a public function to be used, no object creation needed
-    * take a title and a row string to create an Array of vertices
-    *
+  /** Take a title and a row string to create an Array of vertices
     * @param title the page title (meaning the starting edge)
     * @param bob   the raw text to parse in order to extract references to other pages
     * @return Array[(String,String)] of start_edge(title) -> end_edge(referenced page)
@@ -39,8 +37,8 @@ object GraphOperator {
     *         https://gist.github.com/eric-kimbrel/01ab2f97c4438ba7bd9a
     *         Converts an RDD[(String,String)] into Graph[String,Long], all edge weights are set to 1L
     *         Performs joins to associate edges with Long Id's.  May be slow but will support large data sets
-    * @param data simple edge list
-    * @return Graph[String,Long] with all edge weights 1L
+    * @param data simple edge list (by default it's directed
+    * @return Graph[String,Long] Return a GraphX's graph. See GarphX doc for further information
     */
   def unweightedStringEdgeListViaJoin(data: RDD[(String, String)]): Graph[String, Long] = {
 
@@ -71,24 +69,23 @@ object GraphOperator {
     Graph(vertices, edges).partitionBy(PartitionStrategy.EdgePartition2D)
   }
 
-  /** This is a public function to be used, no object creation needed
-    * take a title and a row string to create an Array of vertices
-    *
-    * @param bob the graph
-    * @param sc  SparkContext
-    * @return Array[Long] ID with highest pageRank values and their neighboors with highest pagerank value (10x10)
+  /** Perform a pagerank on the graph then
+   *  Return the top 10 vertices and their ten neighbor with the highest pageRank
+    * @param thegraph the graph
+    * @param sc  current SparkContext
+    * @return Array[Long] ID of the top 10 vertices and their ten neighbor with the highest pageRank (max 100)
     */
-  def pageRanker(bob: Graph[String, Long], sc: SparkContext): Array[Long] = {
+  def pageRanker(thegraph: Graph[String, Long], sc: SparkContext): Array[Long] = {
     //	  Constant
     val direction: EdgeDirection = EdgeDirection.Either
     // Run PageRank
-    val ranks = bob.pageRank(0.0001).vertices
+    val ranks = thegraph.pageRank(0.0001).vertices
     //					On garde slmnt les + importants (les 10)
     val mostImp = ranks
       .takeOrdered(10)(Ordering[Double].reverse.on { x => x._2 })
       .map(x => x._1)
 
-    val best_graph = sc.parallelize(bob.collectNeighborIds(direction).filter(x => mostImp contains x._1)
+    val best_graph = sc.parallelize(thegraph.collectNeighborIds(direction).filter(x => mostImp contains x._1)
       .map(x => x._2.map(i => (x._1, i)))
       .flatMap(x => x).collect())
 
@@ -110,13 +107,13 @@ object GraphOperator {
   }
 
   /** Community counter
-    *
-    * @param bob the graph
+   *  Return the number of partition without edges between them
+    * @param thegraph the graph
     * @param sc  SparkContext
-    * @return Array[Long] ID with highest pageRank values and their neighboors with highest pagerank value (10x10)
+    * @return Long number of communities
     */
-  def communityCounter(bob: Graph[String, Long], sc: SparkContext): Long = {
-    val cc = bob.connectedComponents().vertices
+  def communityCounter(thegraph: Graph[String, Long], sc: SparkContext): Long = {
+    val cc = thegraph.connectedComponents().vertices
     var bib = cc.map(x => x._2).distinct()
     bib.count()
   }
