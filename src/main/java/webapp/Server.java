@@ -49,6 +49,18 @@ public class Server {
             return "Import started";
         }, jsonTransformer);
 
+		post("/embedding/:dimension/:window/:iterations",(req,res)->{
+			if(MiningApp.pagesLoaded()) {
+				int dim = Integer.parseInt(req.params("dimension"));
+				int win = Integer.parseInt(req.params("window"));
+				int ite = Integer.parseInt(req.params("iterations"));
+				MiningApp.wordEmbedding(dim,win,ite);
+				return "performing embedding";
+			}else {
+				return "You need to load a dump first";
+			}
+		}, jsonTransformer);
+		
         get("/graph/bestRank",(req,res)->MiningApp.getBestPageRankGraph(),jsonTransformer);
 
 
