@@ -15,7 +15,8 @@ public class Server {
 
         // Cluster :
 
-        /*String masterInfo = "local[*]";
+
+
         SparkSession ss = SparkSession.builder()
                 .appName("LinkParser")
                 .master("spark://master.atscluster:7077")
@@ -23,16 +24,15 @@ public class Server {
                 .config("spark.driver.memory","4g")
                 .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
                 .config("spark.executor.cores","4")
-                .getOrCreate();*/
+                .getOrCreate();
 
 
         // Local
-        String masterInfo = "local[*]";
-        SparkSession ss = SparkSession.builder()
-                .appName("LinkParser")
-                .master(masterInfo)
-                .config("spark.sql.warehouse.dir", "./spark-warehouse")
-                .getOrCreate();
+//        SparkSession ss = SparkSession.builder()
+//                .appName("LinkParser")
+//                .master("local[*]")
+//                .config("spark.sql.warehouse.dir", "./spark-warehouse")
+//                .getOrCreate();
 
 
         MiningApp.init(ss);

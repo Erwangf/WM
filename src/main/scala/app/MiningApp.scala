@@ -5,7 +5,8 @@ import java.io.File
 import java.nio.file.{Files, Paths}
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{LocalFileSystem, Path}
+import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.spark.graphx._
 import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
 import run.local.WikiDumpImport
@@ -41,8 +42,12 @@ object MiningApp {
 
   private val hdfs: FileSystem = FileSystem.get(new Configuration())
 
+
+
   def init(session: SparkSession): Unit = {
     ss = session
+    ss.sparkContext.hadoopConfiguration.set("fs.hdfs.impl", classOf[DistributedFileSystem].getName)
+    ss.sparkContext.hadoopConfiguration.set("fs.file.impl", classOf[LocalFileSystem].getName)
   }
 
   def getStatus: Status.Value = status
