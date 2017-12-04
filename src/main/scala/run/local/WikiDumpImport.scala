@@ -14,14 +14,6 @@ import scala.util.matching.Regex
 
 object WikiDumpImport {
 
-  def main(args: Array[String]): Unit = {
-    var filePath = this.getClass.getClassLoader.getResource("xml.txt").getPath
-    var masterInfo = "local[*]"
-    val ss = SparkSession.builder().appName("LinkParser").master(masterInfo).getOrCreate()
-    val df = importDumpAndGetDF(filePath, ss)
-
-  }
-
   def importDumpAndGetDF(filePath: String, ss: SparkSession): (DataFrame, Graph[String, Long]) = {
 
     val sqlContext = ss.sqlContext
@@ -53,18 +45,18 @@ object WikiDumpImport {
     val udfTextCleaner = udf(textCleaner)
     df = df.withColumn("text", udfTextCleaner(df.col("text")))
 
-    var a = ss.sparkContext.parallelize(df.select("edges")
+    val a = ss.sparkContext.parallelize(df.select("edges")
       .take(10).flatMap(_.get(0)
       .asInstanceOf[mutable.WrappedArray[Row]]
       .map(r => (r.get(0).asInstanceOf[String], r.get(1).asInstanceOf[String]))))
 
-    var graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
+    val graph = GraphOperator.unweightedStringEdgeListViaJoin(a)
     
-   var model = WordEmbedding.runWord2Vec(ss, df, 50, 3, 2)
+//   var model = WordEmbedding.runWord2Vec(ss, df, 50, 3, 2)
 //   var vocab =  WordEmbedding.getVocabulary(model,ss)
 //   vocab.foreach(println(_))
-   var result = WordEmbedding.sumWords(model,ss,"Antoine","adolfo",3,false)
-   result.foreach(println(_))
+//   var result = WordEmbedding.sumWords(model,ss,"Antoine","adolfo",3,minus = false)
+//   result.foreach(println(_))
     // we return the dataframe df
     (df, graph)
   }

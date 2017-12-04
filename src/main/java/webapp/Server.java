@@ -10,16 +10,30 @@ import static spark.Spark.*;
 
 public class Server {
     public static void main(String[] args) {
-        port(8080);
+        port(8199);
         staticFileLocation("webapp");
 
-        // Spark Config
+        // Cluster :
 
+        /*String masterInfo = "local[*]";
+        SparkSession ss = SparkSession.builder()
+                .appName("LinkParser")
+                .master("spark://master.atscluster:7077")
+                .config("spark.executor.memory","5g")
+                .config("spark.driver.memory","4g")
+                .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
+                .config("spark.executor.cores","4")
+                .getOrCreate();*/
+
+
+        // Local
         String masterInfo = "local[*]";
         SparkSession ss = SparkSession.builder()
                 .appName("LinkParser")
                 .master(masterInfo)
+                .config("spark.sql.warehouse.dir", "./spark-warehouse")
                 .getOrCreate();
+
 
         MiningApp.init(ss);
 
@@ -28,6 +42,7 @@ public class Server {
         get("/count", (req, res) -> MiningApp.pageCount());
 
         get("/status",(req,res)->MiningApp.getStatus());
+
         get("/loadedFile",(req,res)->MiningApp.getLoadedFile());
         
         get("/find/:title", (req, res) -> {
@@ -49,12 +64,12 @@ public class Server {
             return "Import started";
         }, jsonTransformer);
 
-		post("/embedding/:dimension/:window/:iterations",(req,res)->{
+		get("/embedding/start",(req,res)->{
 			if(MiningApp.pagesLoaded()) {
-				int dim = Integer.parseInt(req.params("dimension"));
-				int win = Integer.parseInt(req.params("window"));
-				int ite = Integer.parseInt(req.params("iterations"));
-				MiningApp.wordEmbedding(dim,win,ite);
+				int dim = Integer.parseInt(req.queryParams("dimension"));
+				int win = Integer.parseInt(req.queryParams("window"));
+				int ite = Integer.parseInt(req.queryParams("iterations"));
+				MiningApp.startWordEmbedding(dim,win,ite);
 				return "performing embedding";
 			}else {
 				return "You need to load a dump first";
@@ -63,9 +78,16 @@ public class Server {
 		
         get("/graph/bestRank",(req,res)->MiningApp.getBestPageRankGraph(),jsonTransformer);
 
+        get("/wordEmbedding/sum",(req,res)->{
 
+            return null;
+        },jsonTransformer);
 
-
+        get("/embedding/query/:query/:num",(req,res)->{
+            String query = req.params("query");
+            int num_result = Integer.parseInt(req.params("num"));
+            return MiningApp.findSynonymsForQuery(query,num_result);
+        },jsonTransformer);
 
     }
 

@@ -15,18 +15,23 @@
 			<version>2.11.8</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11 -->
+		<!-- ### SPARK ### -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_2.11</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.11</artifactId>
-			<version>2.1.0</version>
+			<version>2.0.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib_2.11 -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-mllib_2.11</artifactId>
-			<version>2.1.0</version>
+			<version>2.0.0</version>
 		</dependency>
 
 		<!-- Spark-java (for the web app) -->
@@ -36,7 +41,7 @@
 			<version>2.6.0</version>
 		</dependency>
 
-		<!-- Spark-xml -->
+		<!-- Spark-XML, to parse big xml files -->
 		<dependency>
 			<groupId>com.databricks</groupId>
 			<artifactId>spark-xml_2.11</artifactId>
@@ -49,6 +54,8 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.21</version>
 		</dependency>
+
+		<!-- Object to JSON, used in Spark-Java -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -111,7 +118,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>run.local.Word2VecLocalExample</mainClass>
+							<mainClass>webapp.Server</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -124,10 +131,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
-
-
 		</plugins>
 	</build>
 
