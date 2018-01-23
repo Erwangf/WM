@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Options</title>
+    <title>Word Embedding</title>
     <link rel="stylesheet" href="../css/bootstrap-grid.min.css">
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -30,13 +30,13 @@
                 <a href="load.html" class="nav-link">Load</a>
             </li>
             <li class="nav-item">
-                <a  href="graph-viz.html" class="nav-link">Graph Viz</a>
+                <a class="nav-link" href="graph-viz.html">Graph Viz</a>
             </li>
 			<li class="nav-item">
                 <a class="nav-link" href="WordEmbedding.html">Word Embedding</a>
             </li>
             <li class="nav-item">
-                <a href="options.html" class="nav-link active">Options</a>
+                <a class="nav-link" href="options.html">Options</a>
             </li>
             <li class="nav-item">
                 <span id="loadedFile" class="navbar-text" style="padding-right : 8pt; color:green;display : none"></span>
@@ -49,47 +49,54 @@
     </div>
 </nav>
 
+
 <div class="container">
 
     <div class="welcome">
-        <h1>Options</h1>
+        <h1>Launch embedding</h1>
     </div>
-    <div>
-        <h2 class="text-center">Spark Options</h2>
-
-        <form class="row">
-            <div class="form-group col-sm-6">
-                <label for="sparkMasterInput">Spark Master address</label>
-                <input class="form-control" id="sparkMasterInput" placeholder="spark://master:7077">
+    <h2>Parameters : </h2>
+    <div class="form-group row">
+            <div class="form-group col-sm-3">
+                <label for="sparkMasterInput">Dimension of embbeded space</label>
+                <input class="form-control" id="dimension" placeholder="ex : 300">
             </div>
-            <div class="form-group col-sm-6">
-                <label for="sparkMasterInput">Spark App name (optional)</label>
-                <input class="form-control" id="sparkAppNameInput" placeholder="Wikipedia Mining">
+            <div class="form-group col-sm-3">
+                <label for="sparkMasterInput">Window considered</label>
+                <input class="form-control" id="window" placeholder="ex : 3">
             </div>
-            <div class="form-group col-sm-12">
-                <label for="addSparkConfigInput">Additional Spark Configuration</label>
-                <textarea class="form-control" id="addSparkConfigInput" rows="6"></textarea>
+            <div class="form-group col-sm-3">
+                <label for="sparkMasterInput">Number of iterations</label>
+                <input class="form-control" id="iterations" placeholder="ex : 100">
             </div>
-        </form>
+			<br>
 
     </div>
-
+	<div class="row">
+			 <div class="col-3">
+            <button type="button" class="btn btn-primary" id="StartEmb">Start Embedding</button>
+			</div>
+    </div>
 </div>
-
 
 <script src="../js/jquery-3.2.1.min.js"></script>
 <script src="../js/tether.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/common.js"></script>
+
 <script>
 	$.get("/loadedFile", function (data) {
-            if (data!="NA") {
+            if (data!=="NA") {
                 $("#loadedFile").html(data);
 				$("#loadedFile").show();
             }
         });
     serverStatus.start("#status");
+    $("#StartEmb").click(function () {
+        $.get("/embedding/start/" + $("#dimension").val() +"/"+ $("#window").val() +"/"+ $("#iterations").val(), function (data) {
+   
+        });
+    });
 </script>
-
 </body>
 </html>

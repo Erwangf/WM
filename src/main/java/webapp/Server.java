@@ -17,22 +17,22 @@ public class Server {
 
 
 
-        SparkSession ss = SparkSession.builder()
-                .appName("LinkParser")
-                .master("spark://master.atscluster:7077")
-                .config("spark.executor.memory","5g")
-                .config("spark.driver.memory","4g")
-                .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
-                .config("spark.executor.cores","4")
-                .getOrCreate();
+//        SparkSession ss = SparkSession.builder()
+//                .appName("LinkParser")
+//                .master("spark://master.atscluster:7077")
+//                .config("spark.executor.memory","5g")
+//                .config("spark.driver.memory","4g")
+//                .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
+//                .config("spark.executor.cores","4")
+//                .getOrCreate();
 
 
         // Local
-//        SparkSession ss = SparkSession.builder()
-//                .appName("LinkParser")
-//                .master("local[*]")
-//                .config("spark.sql.warehouse.dir", "./spark-warehouse")
-//                .getOrCreate();
+        SparkSession ss = SparkSession.builder()
+                .appName("LinkParser")
+                .master("local[*]")
+                .config("spark.sql.warehouse.dir", "./spark-warehouse")
+                .getOrCreate();
 
 
         MiningApp.init(ss);
@@ -63,12 +63,12 @@ public class Server {
             MiningApp.importWikiDumpInBackground(req.queryParams("path"));
             return "Import started";
         }, jsonTransformer);
-
-		get("/embedding/start",(req,res)->{
+        
+		get("/embedding/start/:dimension/:window/:iterations",(req,res)->{
 			if(MiningApp.pagesLoaded()) {
-				int dim = Integer.parseInt(req.queryParams("dimension"));
-				int win = Integer.parseInt(req.queryParams("window"));
-				int ite = Integer.parseInt(req.queryParams("iterations"));
+				int dim = Integer.parseInt(req.params("dimension"));
+				int win = Integer.parseInt(req.params("window"));
+				int ite = Integer.parseInt(req.params("iterations"));
 				MiningApp.startWordEmbedding(dim,win,ite);
 				return "performing embedding";
 			}else {
