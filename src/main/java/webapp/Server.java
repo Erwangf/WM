@@ -83,11 +83,12 @@ public class Server {
         // - dimension : the number of dimension of the vector space (ex : 50)
         // - window : the window for selecting multiple words (ex : 5)
         // - iterations : the number of iteration for the neural network
-		get("/embedding/start",(req,res)->{
+
+		get("/embedding/start/:dimension/:window/:iterations",(req,res)->{
 			if(MiningApp.pagesLoaded()) {
-				int dim = Integer.parseInt(req.queryParams("dimension"));
-				int win = Integer.parseInt(req.queryParams("window"));
-				int ite = Integer.parseInt(req.queryParams("iterations"));
+				int dim = Integer.parseInt(req.params("dimension"));
+				int win = Integer.parseInt(req.params("window"));
+				int ite = Integer.parseInt(req.params("iterations"));
 				MiningApp.startWordEmbedding(dim,win,ite);
 				return "performing embedding";
 			}else {
