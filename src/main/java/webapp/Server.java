@@ -15,45 +15,42 @@ public class Server {
         if(args.length!=1){
           throw new IllegalArgumentException("Incorrect number of parameters. A configuration json file is needed. Ex : myConfigFile.json");
         }
-        port(8199);
-        staticFileLocation("webapp");
 
-        // Cluster :
-
-
-
-//        SparkSession ss = SparkSession.builder()
-//                .appName("LinkParser")
-//                .master("spark://master.atscluster:7077")
-//                .config("spark.executor.memory","5g")
-//                .config("spark.driver.memory","4g")
-//                .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
-//                .config("spark.executor.cores","4")
-//                .getOrCreate();
-
+        /* ###############  Configuration  ############### */
 
         AppParams params = AppParams.getInstance();
         params.loadParamsFromJSON(args[0]);
 
+        // starting to build spark session : appName and master
         SparkSession.Builder sparkSessionBuilder = SparkSession.builder()
                 .appName(params.getAppName())
                 .master(params.getMaster());
 
+        // spark options
         for (Map.Entry<String, String> entry : params.getSparkOptions().entrySet()) {
             sparkSessionBuilder = sparkSessionBuilder.config(entry.getKey(),entry.getValue());
         }
 
+        // build SparkSession
         SparkSession ss = sparkSessionBuilder.getOrCreate();
 
+        // initialize MiningApp
+        MiningApp.init(ss);
 
+        // initialize Server
+        port(8199);
+        staticFileLocation("webapp");
 
-//        MiningApp.init(ss);
+        /* ##################  Routes  ################## */
+
+        // return the status of the application
         get("/status",(req,res)-> {
                     if (MiningApp.isStarted()) {
                         return MiningApp.getStatus();
                     } else return "not initialized";
                 });
 
+        // return the name of the loaded wikipedia dump
         get("/loadedFile",(req,res)->{
             if(MiningApp.isStarted()){
                 return MiningApp.getLoadedFile();
@@ -61,15 +58,16 @@ public class Server {
             else return "";
         });
 
-
+        // return the number of pages
         get("/count", (req, res) -> MiningApp.pageCount());
 
-        
+        //return the page corresponding to the title
         get("/find/:title", (req, res) -> {
             MiningApp.Page p = MiningApp.getPage(req.params("title"));
             return p == null ? new Object() : p;
         }, jsonTransformer);
 
+        // start the import procedure of the dump saved in the local cache
         get("/import/local",(req,res)->{
             try{
                 MiningApp.importLocal();
@@ -79,11 +77,16 @@ public class Server {
             return "OK";
         },jsonTransformer);
 
+        // start the dump found at the asked path (in query parameters, "path")
         post("/import/dump",(req,res)->{
             MiningApp.importWikiDumpInBackground(req.queryParams("path"));
             return "Import started";
         }, jsonTransformer);
 
+        // start the word embedding procedure, with 3 parameters :
+        // - dimension : the number of dimension of the vector space (ex : 50)
+        // - window : the window for selecting multiple words (ex : 5)
+        // - iterations : the number of iteration for the neural network
 		get("/embedding/start",(req,res)->{
 			if(MiningApp.pagesLoaded()) {
 				int dim = Integer.parseInt(req.queryParams("dimension"));
@@ -95,14 +98,18 @@ public class Server {
 				return "You need to load a dump first";
 			}
 		}, jsonTransformer);
-		
+
+		// get the best pages, based on the PageRank index
         get("/graph/bestRank",(req,res)->MiningApp.getBestPageRankGraph(),jsonTransformer);
 
+        // WORK IN PROGRESS
         get("/wordEmbedding/sum",(req,res)->{
 
             return null;
         },jsonTransformer);
 
+        // WORK IN PROGRESS
+        // TODO : word embedding sum operation
         get("/embedding/query/:query/:num",(req,res)->{
             String query = req.params("query");
             int num_result = Integer.parseInt(req.params("num"));
@@ -112,6 +119,9 @@ public class Server {
     }
 
 
+    /**
+     * A ResponseTransformer, converting any object to his JSON equivalent.
+     */
     private static ResponseTransformer jsonTransformer = new ResponseTransformer() {
         private Gson gson = new Gson();
         @Override
