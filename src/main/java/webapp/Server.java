@@ -44,11 +44,7 @@ public class Server {
         /* ##################  Routes  ################## */
 
         // return the status of the application
-        get("/status",(req,res)-> {
-                    if (MiningApp.isStarted()) {
-                        return MiningApp.getStatus();
-                    } else return "not initialized";
-                });
+        get("/status",(req,res)->  MiningApp.getStatus());
 
         // return the name of the loaded wikipedia dump
         get("/loadedFile",(req,res)->{

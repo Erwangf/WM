@@ -186,7 +186,7 @@ object MiningApp {
   case class VertexLight(id: Long, label: String)
 
   def getBestPageRankGraph: EdgesAndVertices = {
-    var ind = GraphOperator.pageRanker(graph, ss.sparkContext)
+    val ind = GraphOperator.pageRanker(graph, ss.sparkContext)
     val bestGraph = graph.subgraph(_ => true, (a, _) => ind contains a)
 
     EdgesAndVertices(
