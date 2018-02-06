@@ -3,13 +3,18 @@ import app.MiningApp;
 import org.apache.spark.sql.SparkSession;
 import spark.ResponseTransformer;
 import com.google.gson.Gson;
+import webapp.config.AppParams;
 
 import java.io.FileNotFoundException;
+import java.util.Map;
 
 import static spark.Spark.*;
 
 public class Server {
     public static void main(String[] args) {
+        if(args.length!=1){
+          throw new IllegalArgumentException("Incorrect number of parameters. A configuration json file is needed. Ex : myConfigFile.json");
+        }
         port(8199);
         staticFileLocation("webapp");
 
@@ -17,33 +22,48 @@ public class Server {
 
 
 
-        SparkSession ss = SparkSession.builder()
-                .appName("LinkParser")
-                .master("spark://master.atscluster:7077")
-                .config("spark.executor.memory","5g")
-                .config("spark.driver.memory","4g")
-                .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
-                .config("spark.executor.cores","4")
-                .getOrCreate();
-
-
-        // Local
 //        SparkSession ss = SparkSession.builder()
 //                .appName("LinkParser")
-//                .master("local[*]")
-//                .config("spark.sql.warehouse.dir", "./spark-warehouse")
+//                .master("spark://master.atscluster:7077")
+//                .config("spark.executor.memory","5g")
+//                .config("spark.driver.memory","4g")
+//                .config("spark.jars","hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar")
+//                .config("spark.executor.cores","4")
 //                .getOrCreate();
 
 
-        MiningApp.init(ss);
+        AppParams params = AppParams.getInstance();
+        params.loadParamsFromJSON(args[0]);
 
+        SparkSession.Builder sparkSessionBuilder = SparkSession.builder()
+                .appName(params.getAppName())
+                .master(params.getMaster());
+
+        for (Map.Entry<String, String> entry : params.getSparkOptions().entrySet()) {
+            sparkSessionBuilder = sparkSessionBuilder.config(entry.getKey(),entry.getValue());
+        }
+
+        SparkSession ss = sparkSessionBuilder.getOrCreate();
+
+
+
+//        MiningApp.init(ss);
+        get("/status",(req,res)-> {
+                    if (MiningApp.isStarted()) {
+                        return MiningApp.getStatus();
+                    } else return "not initialized";
+                });
+
+        get("/loadedFile",(req,res)->{
+            if(MiningApp.isStarted()){
+                return MiningApp.getLoadedFile();
+            }
+            else return "";
+        });
 
 
         get("/count", (req, res) -> MiningApp.pageCount());
 
-        get("/status",(req,res)->MiningApp.getStatus());
-
-        get("/loadedFile",(req,res)->MiningApp.getLoadedFile());
         
         get("/find/:title", (req, res) -> {
             MiningApp.Page p = MiningApp.getPage(req.params("title"));

@@ -1,0 +1,10 @@
+{
+  "master": "local[*]",
+  "appName": "Wikipedia Mining -- local",
+  "sparkOptions": [
+    {
+      "name": "spark.sql.warehouse.dir",
+      "value": "./spark-warehouse"
+    }
+  ]
+}

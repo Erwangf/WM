@@ -1,0 +1,22 @@
+{
+  "master": "spark://master.atscluster:7077",
+  "appName": "Wikipedia Mining -- cluster",
+  "sparkOptions": [
+    {
+      "name": "spark.executor.memory",
+      "value": "5g"
+    },
+    {
+      "name": "spark.driver.memory",
+      "value": "4g"
+    },
+    {
+      "name": "spark.executor.cores",
+      "value": "4"
+    },
+    {
+      "name": "spark.jars",
+      "value": "hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar"
+    }
+  ]
+}
