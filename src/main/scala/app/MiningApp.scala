@@ -31,6 +31,8 @@ object MiningApp {
   private final val LOCAL_GRAPH_VERTICES_PATH = "./tmp/local_graph_vertices_path.save"
   private final val LOCAL_GRAPH_EDGES_PATH = "./tmp/local_graph_edges_path.save"
 
+
+  private var started: Boolean = false
   private var pages: DataFrame = _
   private var graph: Graph[String, Long] = _
   private var embedded_space: Word2VecModel = _
@@ -48,7 +50,10 @@ object MiningApp {
     ss = session
     ss.sparkContext.hadoopConfiguration.set("fs.hdfs.impl", classOf[DistributedFileSystem].getName)
     ss.sparkContext.hadoopConfiguration.set("fs.file.impl", classOf[LocalFileSystem].getName)
+    started = true
   }
+
+  def isStarted : Boolean = started
 
   def getStatus: Status.Value = status
 
