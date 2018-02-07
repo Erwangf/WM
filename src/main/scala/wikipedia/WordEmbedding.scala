@@ -50,18 +50,18 @@ object WordEmbedding {
     val model = word2Vec.fit(documentDF)
 
     //			Extract Vocabulary
-    val vocab = raw_sent.flatMap(_.split("[ ']")
-      .filter(_.length() > 0)
-      .map(t => t.toLowerCase()))
-      .distinct()
-      .map(Array(_))
-      .toDF("text")
+//    val vocab = raw_sent.flatMap(_.split("[ ']")
+//      .filter(_.length() > 0)
+//      .map(t => t.toLowerCase()))
+//      .distinct()
+//      .map(Array(_))
+//      .toDF("text")
 
-    vocab.select("text")
-      .map(x => x.get(0).asInstanceOf[mutable.WrappedArray[String]](0))
-      .foreach(println(_))
+    //    vocab.select("text")
+    //      .map(x => x.get(0).asInstanceOf[mutable.WrappedArray[String]](0))
+    //      .foreach(println(_))
     // compute words of the corpus
-    val result = model.transform(vocab)
+//    val result = model.transform(vocab)
     //    model.getVectors.rdd.saveAsTextFile(s"D:/Bureau/bob")
     model
   }
@@ -102,7 +102,7 @@ object WordEmbedding {
   }
 
   def queryToSynonyms(mod: Word2VecModel, ss: SparkSession, query: String, num_result: Int): Array[String] = {
-    var vecs = query.split("[+-]").map(word => getVecFromWord(mod, ss, word))
+    val vecs = query.split("[+-]").map(word => getVecFromWord(mod, ss, word))
     val operators = query.filter(c => c == '+' || c == '-').map(c => c == '+')
     var sum = vecs(0)
     for (i <- 1 to operators.length) {
@@ -124,6 +124,6 @@ object WordEmbedding {
     import ss.sqlContext.implicits._
     val v = mod.getVectors.filter($"word" === word.toLowerCase())
       .first()(1)
-      v.asInstanceOf[DenseVector].values
+    v.asInstanceOf[DenseVector].values
   }
 }
