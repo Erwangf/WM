@@ -58,15 +58,15 @@
     <h2>Parameters : </h2>
     <div class="form-group row">
             <div class="form-group col-sm-3">
-                <label for="sparkMasterInput">Dimension of embbeded space</label>
+                <label for="dimension">Dimension of embbeded space</label>
                 <input class="form-control" id="dimension" placeholder="ex : 300">
             </div>
             <div class="form-group col-sm-3">
-                <label for="sparkMasterInput">Window considered</label>
+                <label for="window">Window considered</label>
                 <input class="form-control" id="window" placeholder="ex : 3">
             </div>
             <div class="form-group col-sm-3">
-                <label for="sparkMasterInput">Number of iterations</label>
+                <label for="iterations">Number of iterations</label>
                 <input class="form-control" id="iterations" placeholder="ex : 100">
             </div>
 			<br>
@@ -87,14 +87,13 @@
 <script>
 	$.get("/loadedFile", function (data) {
             if (data!=="NA") {
-                $("#loadedFile").html(data);
-				$("#loadedFile").show();
+                $("#loadedFile").html(data).show();
             }
         });
     serverStatus.start("#status");
     $("#StartEmb").click(function () {
         $.get("/embedding/start/" + $("#dimension").val() +"/"+ $("#window").val() +"/"+ $("#iterations").val(), function (data) {
-   
+            console.log(data);
         });
     });
 </script>

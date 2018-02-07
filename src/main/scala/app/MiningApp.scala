@@ -53,41 +53,6 @@ object MiningApp {
     started = true
   }
 
-  def isStarted : Boolean = started
-
-  def getStatus: Status.Value = status
-
-  def getLoadedFile: String = loadedFile
-
-  @throws(classOf[FileNotFoundException])
-  private def importPages(): Unit = {
-    if (Files.exists(Paths.get(LOCAL_PAGES_PATH))) {
-      pages = ss.read.parquet(LOCAL_PAGES_PATH)
-    }
-    else {
-      throw new FileNotFoundException()
-    }
-
-  }
-
-  def exportPages(): Unit = {
-    pages.write.mode(SaveMode.Overwrite).parquet(LOCAL_PAGES_PATH)
-  }
-
-  def exportGraph(): Unit = {
-
-    if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH))) {
-      hdfs.delete(new Path(LOCAL_GRAPH_VERTICES_PATH), true)
-    }
-
-    if (Files.exists(Paths.get(LOCAL_GRAPH_EDGES_PATH))) {
-      hdfs.delete(new Path(LOCAL_GRAPH_EDGES_PATH), true)
-    }
-
-    graph.vertices.saveAsObjectFile(LOCAL_GRAPH_VERTICES_PATH)
-    graph.edges.saveAsObjectFile(LOCAL_GRAPH_EDGES_PATH)
-  }
-
   def clearLocal(): Unit = {
     if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH))) {
       hdfs.delete(new Path(LOCAL_GRAPH_VERTICES_PATH), true)
@@ -99,16 +64,6 @@ object MiningApp {
       hdfs.delete(new Path(LOCAL_PAGES_PATH), true)
     }
 
-  }
-
-  @throws(classOf[FileNotFoundException])
-  private def importGraph(): Unit = {
-    if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH)) && Files.exists(Paths.get(LOCAL_GRAPH_EDGES_PATH))) {
-      val vertices = ss.sparkContext.objectFile[(VertexId, String)](LOCAL_GRAPH_VERTICES_PATH)
-      val edges = ss.sparkContext.objectFile[Edge[Long]](LOCAL_GRAPH_EDGES_PATH)
-      graph = Graph[String, Long](vertices, edges)
-    }
-    else throw new FileNotFoundException()
   }
 
   @throws(classOf[FileNotFoundException])
@@ -153,12 +108,6 @@ object MiningApp {
 
   }
 
-  def pagesLoaded(): Boolean = {
-    pages != null
-  }
-
-  case class Page(title: String, text: String, edges: Array[(String, String)])
-
   def getPage(pageName: String): Page = {
     val rows = pages.select("title", "text", "edges")
       .filter("title = \"" + pageName + "\"").take(1)
@@ -175,16 +124,6 @@ object MiningApp {
     Page(row.get(0).asInstanceOf[String], row.get(1).asInstanceOf[String], edges)
   }
 
-  def pageCount(): Long = {
-    pages.count()
-  }
-
-  case class EdgesAndVertices(edges: Array[EdgeLight], vertices: Array[VertexLight])
-
-  case class EdgeLight(from: Long, to: Long)
-
-  case class VertexLight(id: Long, label: String)
-
   def getBestPageRankGraph: EdgesAndVertices = {
     val ind = GraphOperator.pageRanker(graph, ss.sparkContext)
     val bestGraph = graph.subgraph(_ => true, (a, _) => ind contains a)
@@ -199,5 +138,75 @@ object MiningApp {
 
     WordEmbedding.queryToSynonyms(embedded_space,ss,query,num_result)
   }
+
+  def pageCount: Long = {
+    pages.count()
+  }
+
+  /* ############## Accessors ############## */
+
+  def isStarted : Boolean = started
+
+  def getStatus: Status.Value = status
+
+  def getLoadedFile: String = loadedFile
+
+  def pagesLoaded: Boolean = {
+    pages != null
+  }
+
+  /* ########## Private functions ########## */
+
+  @throws(classOf[FileNotFoundException])
+  private def importPages(): Unit = {
+    if (Files.exists(Paths.get(LOCAL_PAGES_PATH))) {
+      pages = ss.read.parquet(LOCAL_PAGES_PATH)
+    }
+    else {
+      throw new FileNotFoundException()
+    }
+
+  }
+
+  @throws(classOf[FileNotFoundException])
+  private def importGraph(): Unit = {
+    if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH)) && Files.exists(Paths.get(LOCAL_GRAPH_EDGES_PATH))) {
+      val vertices = ss.sparkContext.objectFile[(VertexId, String)](LOCAL_GRAPH_VERTICES_PATH)
+      val edges = ss.sparkContext.objectFile[Edge[Long]](LOCAL_GRAPH_EDGES_PATH)
+      graph = Graph[String, Long](vertices, edges)
+    }
+    else throw new FileNotFoundException()
+  }
+
+  private def exportPages(): Unit = {
+    pages.write.mode(SaveMode.Overwrite).parquet(LOCAL_PAGES_PATH)
+  }
+
+  private def exportGraph(): Unit = {
+
+    if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH))) {
+      hdfs.delete(new Path(LOCAL_GRAPH_VERTICES_PATH), true)
+    }
+
+    if (Files.exists(Paths.get(LOCAL_GRAPH_EDGES_PATH))) {
+      hdfs.delete(new Path(LOCAL_GRAPH_EDGES_PATH), true)
+    }
+
+    graph.vertices.saveAsObjectFile(LOCAL_GRAPH_VERTICES_PATH)
+    graph.edges.saveAsObjectFile(LOCAL_GRAPH_EDGES_PATH)
+  }
+
+
+
+  /* ############# Case classes ############# */
+
+  case class Page(title: String, text: String, edges: Array[(String, String)])
+
+  case class EdgesAndVertices(edges: Array[EdgeLight], vertices: Array[VertexLight])
+
+  case class EdgeLight(from: Long, to: Long)
+
+  case class VertexLight(id: Long, label: String)
+
 
 }
