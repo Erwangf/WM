@@ -71,3 +71,17 @@ body {
           transform: scale3D(0, 0, 1);
       }
 }
+
+.custom-word-item{
+    border-radius: 8px 8px 8px 8px;
+    -moz-border-radius: 8px 8px 8px 8px;
+    -webkit-border-radius: 8px 8px 8px 8px;
+    border: 1px solid #e6e6e6;
+    background-color: #d6f7ff;
+    margin:5px;
+}
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+}

@@ -86,7 +86,7 @@ object WordEmbedding {
     * @param minus       if true, the word2 is substracted to the first
     * @return Array[String] list of the closest words to the sum vector (the first being the closest)
     */
-  def sumWords(mod: Word2VecModel, ss: SparkSession, word1: String, word2: String, num_results: Int, minus: Boolean): Array[String] = {
+  def sumWords(mod: Word2VecModel, ss: SparkSession, word1: String, word2: String, num_results: Int, minus: Boolean): Array[WordAndSimilarity] = {
 
     val w1 = getVecFromWord(mod, ss, word1)
     var w2 = getVecFromWord(mod, ss, word2)
@@ -99,7 +99,7 @@ object WordEmbedding {
     getSynonymsFromVec(mod, ss, vec_result, num_results)
   }
 
-  def queryToSynonyms(mod: Word2VecModel, ss: SparkSession, query: String, num_result: Int): Array[String] = {
+  def queryToSynonyms(mod: Word2VecModel, ss: SparkSession, query: String, num_result: Int): Array[WordAndSimilarity] = {
     println(query.split("[+-]"))
     val vecs = query.split("[+-]").map(word => getVecFromWord(mod, ss, word))
     val operators = query.filter(c => c == '+' || c == '-').map(c => c == '+')
@@ -112,12 +112,14 @@ object WordEmbedding {
     getSynonymsFromVec(mod, ss, new DenseVector(sum), num_result)
   }
 
-  private def getSynonymsFromVec(mod: Word2VecModel, ss: SparkSession, vec: DenseVector, num_results: Int): Array[String] = {
+  private def getSynonymsFromVec(mod: Word2VecModel, ss: SparkSession, vec: DenseVector, num_results: Int): Array[WordAndSimilarity] = {
     import ss.sqlContext.implicits._
     mod.findSynonyms(vec, num_results)
-      .map(_ (0).asInstanceOf[String])
+      .map(v=>WordAndSimilarity(v(0).asInstanceOf[String],v(1).asInstanceOf[Double]))
       .collect()
   }
+
+  case class WordAndSimilarity(word:String, similarity: Double)
 
   private def getVecFromWord(mod: Word2VecModel, ss: SparkSession, word: String): Array[Double] = {
     import ss.sqlContext.implicits._

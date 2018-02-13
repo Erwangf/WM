@@ -134,7 +134,7 @@ object MiningApp {
     )
   }
 
-  def findSynonymsForQuery(query:String,num_result : Int) : Array[String]= {
+  def findSynonymsForQuery(query:String,num_result : Int) : Array[WordEmbedding.WordAndSimilarity]= {
 
     WordEmbedding.queryToSynonyms(embedded_space,ss,query,num_result)
   }

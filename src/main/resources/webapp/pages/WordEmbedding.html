@@ -32,14 +32,15 @@
             <li class="nav-item">
                 <a class="nav-link" href="graph-viz.html">Graph Viz</a>
             </li>
-			<li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" href="WordEmbedding.html">Word Embedding</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="options.html">Options</a>
             </li>
             <li class="nav-item">
-                <span id="loadedFile" class="navbar-text" style="padding-right : 8pt; color:green;display : none"></span>
+                <span id="loadedFile" class="navbar-text"
+                      style="padding-right : 8pt; color:green;display : none"></span>
             </li>
             <li class="nav-item">
                 <span class="navbar-text">App Status : <b id="status"></b></span>
@@ -57,25 +58,60 @@
     </div>
     <h2>Parameters : </h2>
     <div class="form-group row">
-            <div class="form-group col-sm-3">
-                <label for="dimension">Dimension of embbeded space</label>
-                <input class="form-control" id="dimension" placeholder="ex : 300">
-            </div>
-            <div class="form-group col-sm-3">
-                <label for="window">Window considered</label>
-                <input class="form-control" id="window" placeholder="ex : 3">
-            </div>
-            <div class="form-group col-sm-3">
-                <label for="iterations">Number of iterations</label>
-                <input class="form-control" id="iterations" placeholder="ex : 100">
-            </div>
-			<br>
+        <div class="form-group col-sm-3">
+            <label for="dimension">Dimension of embbeded space</label>
+            <input class="form-control" id="dimension" placeholder="ex : 300">
+        </div>
+        <div class="form-group col-sm-3">
+            <label for="window">Window considered</label>
+            <input class="form-control" id="window" placeholder="ex : 3">
+        </div>
+        <div class="form-group col-sm-3">
+            <label for="iterations">Number of iterations</label>
+            <input class="form-control" id="iterations" placeholder="ex : 100">
+        </div>
+        <div class="col-3">
+            <br>
+            <button type="button" class="btn btn-primary" id="StartEmb">Start Embedding</button>
+        </div>
+        <br>
 
     </div>
-	<div class="row">
-			 <div class="col-3">
-            <button type="button" class="btn btn-primary" id="StartEmb">Start Embedding</button>
-			</div>
+    <hr>
+    <h2>Request :</h2>
+    <div class="form-group row">
+        <div class="form-group col-sm-6">
+            <label for="query">Query</label>
+            <input class="form-control" id="query" placeholder="ex : homme + politique - allemagne">
+        </div>
+        <div class="form-group col-sm-3">
+            <label for="nbResults">Number of results</label>
+            <input class="form-control" id="nbResults" placeholder="ex : 10">
+        </div>
+        <div class="col-3">
+            <br>
+            <button type="button" class="btn btn-primary" id="RunQuery">Run query</button>
+        </div>
+        <br>
+    </div>
+    <h2>Résults :</h2>
+    <div class="row">
+        <div class="col-lg-6 offset-3 text-center" >
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Word</th>
+                    <th scope="col">Similarity</th>
+                </tr>
+                </thead>
+                <tbody id="results">
+
+                </tbody>
+            </table>
+
+        </div>
+
     </div>
 </div>
 
@@ -85,15 +121,35 @@
 <script src="../js/common.js"></script>
 
 <script>
-	$.get("/loadedFile", function (data) {
-            if (data!=="NA") {
-                $("#loadedFile").html(data).show();
-            }
-        });
+    $.get("/loadedFile", function (data) {
+        if (data !== "NA") {
+            $("#loadedFile").html(data).show();
+        }
+    });
     serverStatus.start("#status");
     $("#StartEmb").click(function () {
-        $.get("/embedding/start/" + $("#dimension").val() +"/"+ $("#window").val() +"/"+ $("#iterations").val(), function (data) {
+        $.get("/embedding/start/" + $("#dimension").val() + "/" + $("#window").val() + "/" + $("#iterations").val(), function (data) {
             console.log(data);
+        });
+    });
+    $("#RunQuery").click(function () {
+        var query = $("#query").val();
+        var nbResults = $("#nbResults").val();
+        //http://localhost:8199/embedding/query?query=argentine%2Bpolice&num=10
+
+        $.get("/embedding/query?query=" + encodeURIComponent(query) + "&num=" + nbResults, function (data) {
+            console.log(data);
+            console.log(JSON.parse(data));
+            var d = JSON.parse(data);
+            var raw_html = "";
+            for (var i = 0; i < d.length; i++) {
+                raw_html = raw_html + "<tr>\n" +
+                    "<th scope=\"row\">" + (i + 1) + "</th>\n" +
+                    "<td>" + d[i].word + "</td>\n" +
+                    "<td>" + d[i].similarity + "</td>\n" +
+                    "</tr>"
+            }
+            $("#results").html(raw_html)
         });
     });
 </script>
