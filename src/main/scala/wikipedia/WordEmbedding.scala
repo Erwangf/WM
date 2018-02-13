@@ -6,8 +6,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import tool.VectorMath
 
-import scala.collection.mutable
-
 object WordEmbedding {
 
   /** Perform a word embedding on text dataframe and return the model
@@ -123,7 +121,6 @@ object WordEmbedding {
 
   private def getVecFromWord(mod: Word2VecModel, ss: SparkSession, word: String): Array[Double] = {
     import ss.sqlContext.implicits._
-    val a = mod.getVectors.filter($"word" === word.toLowerCase())
     val v = mod.getVectors.filter($"word" === word.toLowerCase())
       .first()(1)
     v.asInstanceOf[DenseVector].values
