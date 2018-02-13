@@ -107,9 +107,10 @@ public class Server {
 
         // WORK IN PROGRESS
         // TODO : word embedding sum operation
-        get("/embedding/query/:query/:num",(req,res)->{
-            String query = req.params("query");
-            int num_result = Integer.parseInt(req.params("num"));
+        get("/embedding/query",(req,res)->{
+            String query = req.queryParams("query");
+            System.out.println(query);
+            int num_result = Integer.parseInt(req.queryParams("num"));
             return MiningApp.findSynonymsForQuery(query,num_result);
         },jsonTransformer);
 

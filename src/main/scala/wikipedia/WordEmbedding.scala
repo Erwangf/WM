@@ -102,12 +102,13 @@ object WordEmbedding {
   }
 
   def queryToSynonyms(mod: Word2VecModel, ss: SparkSession, query: String, num_result: Int): Array[String] = {
+    println(query.split("[+-]"))
     val vecs = query.split("[+-]").map(word => getVecFromWord(mod, ss, word))
     val operators = query.filter(c => c == '+' || c == '-').map(c => c == '+')
     var sum = vecs(0)
-    for (i <- 1 to operators.length) {
+    for (i <- 1 until vecs.length) {
       var v = vecs(i)
-      if (!operators(i)) v = VectorMath.opposite(vecs(i))
+      if (!operators(i-1)) v = VectorMath.opposite(vecs(i))
       sum = VectorMath.addVec(sum, v)
     }
     getSynonymsFromVec(mod, ss, new DenseVector(sum), num_result)
@@ -122,6 +123,7 @@ object WordEmbedding {
 
   private def getVecFromWord(mod: Word2VecModel, ss: SparkSession, word: String): Array[Double] = {
     import ss.sqlContext.implicits._
+    val a = mod.getVectors.filter($"word" === word.toLowerCase())
     val v = mod.getVectors.filter($"word" === word.toLowerCase())
       .first()(1)
     v.asInstanceOf[DenseVector].values
