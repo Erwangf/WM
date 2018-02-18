@@ -11,6 +11,19 @@ object VectorMath {
   }
 
   def addVec(a: Array[Double], b: Array[Double]): Array[Double] = {
+    if(a==null){
+      if(b==null){
+        null
+      } else {
+        b
+      }
+    } else {
+      if(b==null){
+        a
+      }
+    }
+
+
     var result: Array[Double] = Array()
 
     for (elem <- a.indices) {
@@ -20,6 +33,17 @@ object VectorMath {
   }
 
   def subVec(a: Array[Double], b: Array[Double]): Array[Double] = {
+    if(a==null){
+      if(b==null){
+        null
+      } else {
+        b
+      }
+    } else {
+      if(b==null){
+        a
+      }
+    }
     var result: Array[Double] = Array()
 
     for (elem <- a.indices) {

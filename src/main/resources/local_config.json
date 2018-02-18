@@ -5,6 +5,14 @@
     {
       "name": "spark.sql.warehouse.dir",
       "value": "./spark-warehouse"
+    },
+    {
+      "name": "spark.driver.maxResultSize",
+      "value": "8g"
+    },
+    {
+      "name": "spark.local.dir",
+      "value": "./tmp/spark-temp"
     }
   ]
 }

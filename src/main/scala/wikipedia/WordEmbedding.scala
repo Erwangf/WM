@@ -33,7 +33,7 @@ object WordEmbedding {
         .map(t => t.toLowerCase())
       )
       .toDF("text")
-    documentDF.select("text").show()
+//    documentDF.select("text").show()
 
     val word2Vec = new Word2Vec()
       .setInputCol("text")
@@ -42,7 +42,7 @@ object WordEmbedding {
       .setWindowSize(window)
       .setMaxIter(iteration)
       .setNumPartitions(32)
-      .setMinCount(0)
+      .setMinCount(5)
 
     // train the model
     val model = word2Vec.fit(documentDF)
@@ -124,7 +124,12 @@ object WordEmbedding {
   private def getVecFromWord(mod: Word2VecModel, ss: SparkSession, word: String): Array[Double] = {
     import ss.sqlContext.implicits._
     val v = mod.getVectors.filter($"word" === word.toLowerCase())
-      .first()(1)
-    v.asInstanceOf[DenseVector].values
+    if(v.count()==0) {
+      null
+    }
+    else {
+      v.first()(1).asInstanceOf[DenseVector].values
+    }
+
   }
 }

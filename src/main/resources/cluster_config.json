@@ -17,6 +17,10 @@
     {
       "name": "spark.jars",
       "value": "hdfs://master.atscluster:8020/wikipedia-mining-0.0-jar-with-dependencies.jar"
+    },
+    {
+      "name": "spark.driver.maxResultSize",
+      "value": "4g"
     }
   ]
 }

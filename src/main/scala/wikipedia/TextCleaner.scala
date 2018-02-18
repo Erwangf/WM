@@ -21,7 +21,7 @@ object TextCleaner {
 							var index_end_tag = output.indexOf(">",index_start_tag+1)
 									//        println(index_end_tag)
 									var label_tag = "/"+output.substring(index_start_tag+1,index_end_tag)
-									        println(label_tag)
+//									        println(label_tag)
 									var index_closing_tag = output.indexOf(label_tag,index_end_tag)
 									if(index_closing_tag == -1){
 										output = output.substring(0,index_start_tag-1) + output.substring(index_end_tag+1)
@@ -38,7 +38,7 @@ object TextCleaner {
 										eq = false
 									}
 						}
-						println(output)
+//						println(output)
 			} 
 			catch
 			{
