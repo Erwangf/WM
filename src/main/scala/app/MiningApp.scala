@@ -18,6 +18,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import tool.VectorMath
 import org.apache.spark.sql.SaveMode
+import webapp.config.AppParams
 
 import scala.collection.mutable
 
@@ -27,9 +28,9 @@ object Status extends Enumeration {
 
 object MiningApp {
 
-  private final val LOCAL_PAGES_PATH = "./tmp/local_pages_path.parquet"
-  private final val LOCAL_GRAPH_VERTICES_PATH = "./tmp/local_graph_vertices_path.save"
-  private final val LOCAL_GRAPH_EDGES_PATH = "./tmp/local_graph_edges_path.save"
+  private final val LOCAL_PAGES_PATH = AppParams.getInstance().getLocalSaveDir+"local_pages_path.parquet"
+  private final val LOCAL_GRAPH_VERTICES_PATH = AppParams.getInstance().getLocalSaveDir+"local_graph_vertices_path.save"
+  private final val LOCAL_GRAPH_EDGES_PATH = AppParams.getInstance().getLocalSaveDir+"local_graph_edges_path.save"
 
 
   private var started: Boolean = false
@@ -159,23 +160,14 @@ object MiningApp {
 
   @throws(classOf[FileNotFoundException])
   private def importPages(): Unit = {
-    if (Files.exists(Paths.get(LOCAL_PAGES_PATH))) {
       pages = ss.read.parquet(LOCAL_PAGES_PATH)
-    }
-    else {
-      throw new FileNotFoundException()
-    }
-
   }
 
   @throws(classOf[FileNotFoundException])
   private def importGraph(): Unit = {
-    if (Files.exists(Paths.get(LOCAL_GRAPH_VERTICES_PATH)) && Files.exists(Paths.get(LOCAL_GRAPH_EDGES_PATH))) {
       val vertices = ss.sparkContext.objectFile[(VertexId, String)](LOCAL_GRAPH_VERTICES_PATH)
       val edges = ss.sparkContext.objectFile[Edge[Long]](LOCAL_GRAPH_EDGES_PATH)
       graph = Graph[String, Long](vertices, edges)
-    }
-    else throw new FileNotFoundException()
   }
 
   private def exportPages(): Unit = {

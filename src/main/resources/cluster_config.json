@@ -1,6 +1,7 @@
 {
   "master": "spark://master.atscluster:7077",
   "appName": "Wikipedia Mining -- cluster",
+  "localSaveDir" : "hdfs://master.atscluster:8020/local/",
   "sparkOptions": [
     {
       "name": "spark.executor.memory",

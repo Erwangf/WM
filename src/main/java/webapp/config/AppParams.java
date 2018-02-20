@@ -35,9 +35,19 @@ public class AppParams {
         this.sparkOptions = sparkOptions;
     }
 
+    public String getLocalSaveDir() {
+        return localSaveDir;
+    }
+
+    public void setLocalSaveDir(String localSaveDir) {
+        this.localSaveDir = localSaveDir;
+    }
+
+
     private String master;
     private String appName;
     private Map<String, String> sparkOptions;
+    private String localSaveDir;
 
 
     private AppParams() {
@@ -58,6 +68,7 @@ public class AppParams {
             // important parameters
             this.appName = obj.getString("appName");
             this.master = obj.getString("master");
+            this.localSaveDir = obj.getString("localSaveDir");
 
             // spark options ( a json array : [ { "name" : "blablabla", "value" : "blablabla" } ]
             this.sparkOptions = new LinkedHashMap<>();
