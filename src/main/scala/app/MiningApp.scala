@@ -1,24 +1,17 @@
 package app
 
-import java.io.FileNotFoundException
-import java.io.File
+import java.io.{File, FileNotFoundException}
 import java.nio.file.{Files, Paths}
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{LocalFileSystem, Path}
 import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.spark.graphx._
+import org.apache.spark.ml.feature.Word2VecModel
 import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
 import run.local.WikiDumpImport
-import wikipedia.GraphOperator
-import wikipedia.WordEmbedding
-import org.apache.spark.ml.feature.{Word2Vec, Word2VecModel}
-import org.apache.spark.ml.linalg.DenseVector
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import tool.VectorMath
-import org.apache.spark.sql.SaveMode
 import webapp.config.AppParams
+import wikipedia.{GraphOperator, WordEmbedding}
 
 import scala.collection.mutable
 
@@ -28,9 +21,9 @@ object Status extends Enumeration {
 
 object MiningApp {
 
-  private final val LOCAL_PAGES_PATH = AppParams.getInstance().getLocalSaveDir+"local_pages_path.parquet"
-  private final val LOCAL_GRAPH_VERTICES_PATH = AppParams.getInstance().getLocalSaveDir+"local_graph_vertices_path.save"
-  private final val LOCAL_GRAPH_EDGES_PATH = AppParams.getInstance().getLocalSaveDir+"local_graph_edges_path.save"
+  private final val LOCAL_PAGES_PATH = AppParams.getInstance().getLocalSaveDir + "local_pages_path.parquet"
+  private final val LOCAL_GRAPH_VERTICES_PATH = AppParams.getInstance().getLocalSaveDir + "local_graph_vertices_path.save"
+  private final val LOCAL_GRAPH_EDGES_PATH = AppParams.getInstance().getLocalSaveDir + "local_graph_edges_path.save"
 
 
   private var started: Boolean = false
@@ -44,7 +37,6 @@ object MiningApp {
   import org.apache.hadoop.fs.FileSystem
 
   private val hdfs: FileSystem = FileSystem.get(new Configuration())
-
 
 
   def init(session: SparkSession): Unit = {
@@ -98,6 +90,24 @@ object MiningApp {
 
   }
 
+
+  def createTempPagesExport(): Unit = {
+    pages
+      .coalesce(1)
+      .write.mode(SaveMode.Overwrite)
+      .format("org.apache.spark.sql.json")
+      .save(AppParams.getInstance().getLocalSaveDir + "tmpExportPages.json")
+  }
+
+  def createTempVSMExport(): Unit = {
+    embedded_space.getVectors
+      .coalesce(1)
+      .write.mode(SaveMode.Overwrite)
+      .format("org.apache.spark.sql.json")
+      .save(AppParams.getInstance().getLocalSaveDir + "tmpExportVSM.json")
+  }
+
+
   def startWordEmbedding(dimension: Int, window: Int, iteration: Int): Unit = {
     status = Status.RUNNING
     new Thread(new Runnable {
@@ -135,10 +145,11 @@ object MiningApp {
     )
   }
 
-  def findSynonymsForQuery(query:String,num_result : Int) : Array[WordEmbedding.WordAndSimilarity]= {
+  def findSynonymsForQuery(query: String, num_result: Int): Array[WordEmbedding.WordAndSimilarity] = {
 
-    WordEmbedding.queryToSynonyms(embedded_space,ss,query,num_result)
+    WordEmbedding.queryToSynonyms(embedded_space, ss, query, num_result)
   }
+
 
   def pageCount: Long = {
     pages.count()
@@ -146,7 +157,7 @@ object MiningApp {
 
   /* ############## Accessors ############## */
 
-  def isStarted : Boolean = started
+  def isStarted: Boolean = started
 
   def getStatus: Status.Value = status
 
@@ -160,14 +171,14 @@ object MiningApp {
 
   @throws(classOf[FileNotFoundException])
   private def importPages(): Unit = {
-      pages = ss.read.parquet(LOCAL_PAGES_PATH)
+    pages = ss.read.parquet(LOCAL_PAGES_PATH)
   }
 
   @throws(classOf[FileNotFoundException])
   private def importGraph(): Unit = {
-      val vertices = ss.sparkContext.objectFile[(VertexId, String)](LOCAL_GRAPH_VERTICES_PATH)
-      val edges = ss.sparkContext.objectFile[Edge[Long]](LOCAL_GRAPH_EDGES_PATH)
-      graph = Graph[String, Long](vertices, edges)
+    val vertices = ss.sparkContext.objectFile[(VertexId, String)](LOCAL_GRAPH_VERTICES_PATH)
+    val edges = ss.sparkContext.objectFile[Edge[Long]](LOCAL_GRAPH_EDGES_PATH)
+    graph = Graph[String, Long](vertices, edges)
   }
 
   private def exportPages(): Unit = {
@@ -187,7 +198,6 @@ object MiningApp {
     graph.vertices.saveAsObjectFile(LOCAL_GRAPH_VERTICES_PATH)
     graph.edges.saveAsObjectFile(LOCAL_GRAPH_EDGES_PATH)
   }
-
 
 
   /* ############# Case classes ############# */

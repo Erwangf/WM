@@ -1,12 +1,20 @@
 package webapp;
 import app.MiningApp;
 import org.apache.spark.sql.SparkSession;
+import spark.Request;
+import spark.Response;
 import spark.ResponseTransformer;
 import com.google.gson.Gson;
 import webapp.config.AppParams;
 
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static spark.Spark.*;
 
@@ -106,13 +114,15 @@ public class Server {
         },jsonTransformer);
 
         // WORK IN PROGRESS
-        // TODO : word embedding sum operation
         get("/embedding/query",(req,res)->{
             String query = req.queryParams("query");
             System.out.println(query);
             int num_result = Integer.parseInt(req.queryParams("num"));
             return MiningApp.findSynonymsForQuery(query,num_result);
         },jsonTransformer);
+
+        get("/export", Server::getFile);
+        get("/exportVSM", Server::getFileEmbedding);
 
     }
 
@@ -127,4 +137,78 @@ public class Server {
             return gson.toJson(model);
         }
     };
+
+
+//    public static void main(String[] args) {
+//        //setPort(8080);
+//        get("/hello", (request, responce) -> getFile(request,responce));
+//    }
+
+    private static Object getFile(Request request, Response responce) {
+        MiningApp.createTempPagesExport();
+        File dir = new File(AppParams.getInstance().getLocalSaveDir() + "tmpExportPages.json");
+        File[] files = dir.listFiles();
+        File file = new File("");
+        assert files != null;
+        for (File f : files) {
+            if (f.getName().endsWith(".json")){
+                file = f;
+                break;
+            }
+        }
+        responce.raw().setContentType("application/octet-stream");
+        responce.raw().setHeader("Content-Disposition", "attachment; filename=export.zip");
+        try {
+
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(responce.raw().getOutputStream()));
+                 BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file))) {
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+
+                zipOutputStream.putNextEntry(zipEntry);
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = bufferedInputStream.read(buffer)) > 0) {
+                    zipOutputStream.write(buffer, 0, len);
+                }
+            }
+        } catch (Exception e) {
+            halt(405, "server error");
+        }
+
+        return null;
+    }
+
+    private static Object getFileEmbedding(Request request, Response responce) {
+        MiningApp.createTempVSMExport();
+        File dir = new File(AppParams.getInstance().getLocalSaveDir() + "tmpExportVSM.json");
+        File[] files = dir.listFiles();
+        File file = new File("");
+        assert files != null;
+        for (File f : files) {
+            if (f.getName().endsWith(".json")){
+                file = f;
+                break;
+            }
+        }
+        responce.raw().setContentType("application/octet-stream");
+        responce.raw().setHeader("Content-Disposition", "attachment; filename=export.zip");
+        try {
+
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(responce.raw().getOutputStream()));
+                 BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file))) {
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+
+                zipOutputStream.putNextEntry(zipEntry);
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = bufferedInputStream.read(buffer)) > 0) {
+                    zipOutputStream.write(buffer, 0, len);
+                }
+            }
+        } catch (Exception e) {
+            halt(405, "server error");
+        }
+
+        return null;
+    }
 }

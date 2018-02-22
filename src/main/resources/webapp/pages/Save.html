@@ -36,7 +36,7 @@
                 <a class="nav-link" href="WordEmbedding.html">Word Embedding</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="options.html">Options</a>
+                <a class="nav-link active" href="Save.html">Save</a>
             </li>
             <li class="nav-item">
                 <span id="loadedFile" class="navbar-text"
@@ -54,18 +54,15 @@
 <div class="container">
 
     <div class="welcome">
-        <h1>Launch embedding</h1>
+        <h1>Export Data</h1>
     </div>
-    <h2>Parameters : </h2>
     <div class="form-group row">
         <div class="form-group col-sm-3">
-			<button type="button" class="btn btn-primary" id="SaveGraph">Save graph</button>
+            <a target="_blank" href="/export"><button type="button" class="btn btn-primary" id="SaveGraph">Export data</button></a>
         </div>
+
         <div class="form-group col-sm-3">
-			<button type="button" class="btn btn-primary" id="SavePages">Save cleaned pages</button>
-        </div>
-        <div class="form-group col-sm-3">
-            <button type="button" class="btn btn-primary" id="SaveEmb">Save Embedding</button>
+            <a target="_blank" href="/exportVSM"><button type="button" class="btn btn-primary" id="SaveEmb">Save Embedding</button></a>
         </div>
     </div>
    
@@ -83,31 +80,8 @@
         }
     });
     serverStatus.start("#status");
-    $("#StartEmb").click(function () {
-        $.get("/embedding/start/" + $("#dimension").val() + "/" + $("#window").val() + "/" + $("#iterations").val(), function (data) {
-            console.log(data);
-        });
-    });
-    $("#RunQuery").click(function () {
-        var query = $("#query").val();
-        var nbResults = $("#nbResults").val();
-        //http://localhost:8199/embedding/query?query=argentine%2Bpolice&num=10
 
-        $.get("/embedding/query?query=" + encodeURIComponent(query) + "&num=" + nbResults, function (data) {
-            console.log(data);
-            console.log(JSON.parse(data));
-            var d = JSON.parse(data);
-            var raw_html = "";
-            for (var i = 0; i < d.length; i++) {
-                raw_html = raw_html + "<tr>\n" +
-                    "<th scope=\"row\">" + (i + 1) + "</th>\n" +
-                    "<td>" + d[i].word + "</td>\n" +
-                    "<td>" + d[i].similarity + "</td>\n" +
-                    "</tr>"
-            }
-            $("#results").html(raw_html)
-        });
-    });
+
 </script>
 </body>
 </html>
